@@ -1,0 +1,3 @@
+[submodule "minijira-protocol"]
+	path = minijira-protocol
+	url = https://github.com/mathiasplans/minijira-protocol.git
