@@ -85,7 +85,6 @@ public class Connection extends Message implements Closeable {
         return false;
     }
 
-    @Override
     public void close() throws IOException {
         socket.close();
     }
