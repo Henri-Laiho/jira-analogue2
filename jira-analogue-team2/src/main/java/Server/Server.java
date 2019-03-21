@@ -1,6 +1,8 @@
 package Server;
 
-public class Server {
+import Messages.JiraMessageHandler;
+
+public class Server implements JiraMessageHandler {
 
     public boolean createTask(byte[] data) {
         return false;
