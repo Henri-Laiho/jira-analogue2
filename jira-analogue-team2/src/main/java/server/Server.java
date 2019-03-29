@@ -1,6 +1,6 @@
 package server;
 
-import Messages.JiraMessageHandler;
+import messages.JiraMessageHandler;
 
 public class Server implements JiraMessageHandler {
 

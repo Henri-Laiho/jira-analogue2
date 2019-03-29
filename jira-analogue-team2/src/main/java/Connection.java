@@ -1,5 +1,5 @@
-import Messages.JiraMessageHandler;
-import Messages.Message;
+import messages.JiraMessageHandler;
+import messages.Message;
 
 import java.io.Closeable;
 import java.io.DataInputStream;
