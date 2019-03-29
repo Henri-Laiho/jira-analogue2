@@ -19,6 +19,14 @@
             <artifactId>minijira-protocol</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- JSON library for class serialization -->
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1</version>
+        </dependency>
+
     </dependencies>
 
 </project>

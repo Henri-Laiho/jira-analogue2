@@ -1,8 +1,9 @@
-package Client;
+package server;
 
 import Messages.JiraMessageHandler;
 
-public class Client implements JiraMessageHandler {
+public class Server implements JiraMessageHandler {
+
     public boolean createTask(byte[] data) {
         return false;
     }

@@ -11,12 +11,12 @@ import java.net.Socket;
  * A helper class for implementing the minijira-protocol on server-side and client-side
  *
  * The overrided message handling methods return false if called on the wrong side, otherwise
- * call the real message handling methods in Client or Server classes.
+ * call the real message handling methods in client or server classes.
  *
- * Server-side example:
+ * server-side example:
  * {@code try(Connection connection = new Connection(server, socket)) {//try to read message from client}}
  *
- * Client-side example:
+ * client-side example:
  * {@code try(Connection connection = new Connection(client, new Socket(ip, port))) {//send messages and requests to server}}
  *
  */
