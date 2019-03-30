@@ -3,6 +3,8 @@ package client;
 import messages.JiraMessageHandler;
 
 public class Client implements JiraMessageHandler {
+
+
     public boolean createTask(byte[] data) {
         return false;
     }
