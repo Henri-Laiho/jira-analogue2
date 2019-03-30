@@ -24,7 +24,7 @@ public class Task {
     private int priority = -1;
     private long createdBy = -1;
     private Date deadline = null;
-    private Date created = null;
+    private Date dateCreated = null;
     private Task masterTask = null;
     private long masterTaskId = -1;
     private List<User> employees = new ArrayList<>();
@@ -50,7 +50,7 @@ public class Task {
         if (object.containsKey(KEY_DEADLINE))
             result.deadline = new Date((Integer) object.get(KEY_DEADLINE));
         if (object.containsKey(KEY_CREATED))
-            result.created = new Date((Integer) object.get(KEY_CREATED));
+            result.dateCreated = new Date((Integer) object.get(KEY_CREATED));
         if (object.containsKey(KEY_MASTERTASK))
             result.masterTaskId = (Integer) object.get(KEY_MASTERTASK);
 
@@ -67,6 +67,25 @@ public class Task {
     }
 
     public static JSONObject toJson(Task object) {
-        return null;
+        JSONObject result = new JSONObject();
+
+        result.put(KEY_TASKID, object.taskId);
+        result.put(KEY_COMPLETED, object.isCompleted);
+        result.put(KEY_TITLE, object.title);
+        result.put(KEY_DESCRIPTION, object.description);
+        result.put(KEY_PRIORITY, object.priority);
+        result.put(KEY_CREATEDBY, object.createdBy);
+        result.put(KEY_DEADLINE, object.deadline);
+        result.put(KEY_CREATED, object.dateCreated);
+        result.put(KEY_MASTERTASK, object.masterTask.taskId);
+
+        JSONArray array = new JSONArray();
+        object.employees.forEach(user -> {
+            array.add(user.getUserId());
+        });
+        result.put(KEY_EMPLOYEES, array);
+
+
+        return result;
     }
 }
