@@ -9,8 +9,8 @@ import java.util.List;
 
 
 public class CLITester {
-
-    static void test(String[] args) throws ParseException, IOException {
+    //duplicate code in ClientMain
+    /*static void test(String[] args) throws ParseException, IOException {
         boolean establishedConnection;
         Options options = new Options();
         options.addOption("c", "connect", true, "Send connect request to server(with name).")
@@ -37,7 +37,7 @@ public class CLITester {
                                 .addOption("log", "login", true, "command to log into specified project");
 
                 String searchTerm = cmd.getOptionValue("s");
-                if (searchTerm == null || searchTerm.equalsIgnoreCase("")) {
+                if (searchTerm == null || searchTerm.isEmpty()) {
                     System.out.println("Search term may not be empty");
                 }
                 else {
@@ -59,7 +59,7 @@ public class CLITester {
         }
     }
 
-    public static void main(String[] args) throws ParseException {
+    public static void main(String[] args) throws Exception {
         test(args);
-    }
+    }*/
 }

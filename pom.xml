@@ -9,14 +9,27 @@
     <version>0.1</version>
     <packaging>pom</packaging>
 
-    <modules>
-        <module>jira-analogue-team2</module>
-        <module>minijira-protocol</module>
-    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <executable>java</executable>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+
+    <modules>
+        <module>jira-analogue-team2</module>
+        <module>minijira-protocol</module>
+    </modules>
 
 </project>

@@ -3,21 +3,31 @@ package apacheUI;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.virtual.DefaultVirtualTerminal;
 
 import java.io.IOException;
 
-public class TUI{
+public class TUI {
+    Terminal terminal;
+    Screen screen;
+    TextGraphics tg;
 
-        public static void main(String[] args) throws IOException {
-            Terminal terminal = new DefaultVirtualTerminal();
-            Screen screen = new TerminalScreen(terminal);
-            TextGraphics tg = screen.newTextGraphics();
+    public TUI(String[] args) throws IOException {
+        System.out.println("test");
 
-            screen.startScreen();
-            tg.putString(9,9, "testing");
-            screen.refresh();
+        DefaultTerminalFactory dtf = new DefaultTerminalFactory();
 
-        }
+        terminal = dtf.createTerminal();
+        screen = new TerminalScreen(terminal);
+        tg = screen.newTextGraphics();
+
+        screen.startScreen();
+        tg.putString(9,9, "testing");
+        screen.refresh();
+    }
+
+    public static void main(String[] args) throws IOException {
+        new TUI(args);
+    }
 }
