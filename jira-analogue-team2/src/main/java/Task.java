@@ -1,12 +1,12 @@
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import data.RawTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 public class Task {
-    private static final String KEY_TASKID = "taskId";
+    /*private static final String KEY_TASKID = "taskId";
     private static final String KEY_COMPLETED = "isCompleted";
     private static final String KEY_TITLE = "title";
     private static final String KEY_DESCRIPTION = "description";
@@ -15,22 +15,54 @@ public class Task {
     private static final String KEY_DEADLINE = "deadline";
     private static final String KEY_CREATED = "dateCreated";
     private static final String KEY_MASTERTASK = "masterTask";
-    private static final String KEY_EMPLOYEES = "assignedEmployees";
+    private static final String KEY_EMPLOYEES = "assignedEmployees";*/
+
+    public Task(RawTask rawTask) {
+        this.rawTask = rawTask;
+        this.taskId = rawTask.taskId;
+        this.isCompleted = rawTask.isCompleted;
+        this.title = rawTask.title;
+        this.description = rawTask.description;
+        this.priority = rawTask.priority;
+        this.deadline = new Date(rawTask.deadlineMS);
+        this.dateCreated = new Date(rawTask.dateCreatedMS);
+
+        Arrays.sort(rawTask.assignedEmployees);
+    }
+
+    public void initialize(List<Task> taskList, List<User> users) {
+        for (Task task : taskList) {
+            if (task.taskId == rawTask.masterTaskId) {
+                this.masterTask = task;
+                break;
+            }
+        }
+
+        for (User user : users) {
+            int i;
+            if ((i = Arrays.binarySearch(rawTask.assignedEmployees, user.getUserId())) >= 0) {
+                this.employees.add(user);
+            }
+            if (user.getUserId() == rawTask.createdBy) {
+                createdBy = user;
+            }
+        }
+    }
+
+    private RawTask rawTask;
 
     private long taskId;
-    private boolean isCompleted = false;
-    private String title = "";
-    private String description = "";
-    private int priority = -1;
-    private long createdBy = -1;
-    private Date deadline = null;
-    private Date dateCreated = null;
-    private Task masterTask = null;
-    private long masterTaskId = -1;
+    private boolean isCompleted;
+    private String title;
+    private String description;
+    private int priority;
+    private User createdBy;
+    private Date deadline;
+    private Date dateCreated;
+    private Task masterTask;
     private List<User> employees = new ArrayList<>();
-    private long[] empolyeeIds = null;
 
-    public static Task fromJson(JSONObject object) {
+    /*public static Task fromJson(JSONObject object) {
         Task result = new Task();
 
         if (object.containsKey(KEY_TASKID))
@@ -64,9 +96,9 @@ public class Task {
             }
         }
         return result;
-    }
+    }*/
 
-    public static JSONObject toJson(Task object) {
+    /*public static JSONObject toJson(Task object) {
         JSONObject result = new JSONObject();
 
         result.put(KEY_TASKID, object.taskId);
@@ -87,5 +119,5 @@ public class Task {
 
 
         return result;
-    }
+    }*/
 }
