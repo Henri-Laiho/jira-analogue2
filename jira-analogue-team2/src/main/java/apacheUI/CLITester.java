@@ -8,19 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//testimiseks <args -c test -s testproject>
-
 public class CLITester {
-
-    static void test(String[] args) throws ParseException, IOException {
+    //duplicate code in ClientMain
+    /*static void test(String[] args) throws ParseException, IOException {
         boolean establishedConnection;
-        //lisab uued CMD optionid
         Options options = new Options();
         options.addOption("c", "connect", true, "Send connect request to server(with name).")
                 .addOption("h", "help", false, "print this message")
-                .addOption("version", "print the version information and exit")
-                .addOption("s", "search", true, "search for project name")
-                .addOption("log", "login", true, "command to log into specified project");
+                .addOption("version", "print the version information and exit");
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
         String serverName = cmd.getOptionValue("c");
@@ -37,15 +32,20 @@ public class CLITester {
             establishedConnection = true;
 
             if (establishedConnection) {
+                Options connectedOptions = new Options();
+                connectedOptions.addOption("s", "search", true, "search for project name")
+                                .addOption("log", "login", true, "command to log into specified project");
 
                 String searchTerm = cmd.getOptionValue("s");
-                if (searchTerm == null || searchTerm.equalsIgnoreCase("")) {
+                if (searchTerm == null || searchTerm.isEmpty()) {
                     System.out.println("Search term may not be empty");
-                } else {
-                    System.out.print("Searching for project ==> " + searchTerm + " \n");
+                }
+                else {
+                    System.out.print("Searching for project ==> " + searchTerm);
                     if (projectList.contains(searchTerm)) {
                         TUI.main(args);
-                    } else {
+                    }
+                    else {
                         System.out.println("project not found in database");
                     }
                 }
@@ -59,7 +59,7 @@ public class CLITester {
         }
     }
 
-    public static void main(String[] args) throws ParseException, IOException {
+    public static void main(String[] args) throws Exception {
         test(args);
-    }
+    }*/
 }

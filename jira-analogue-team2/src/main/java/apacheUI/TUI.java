@@ -1,7 +1,6 @@
 package apacheUI;
 
 import com.googlecode.lanterna.SGR;
-import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
@@ -10,17 +9,17 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.virtual.DefaultVirtualTerminal;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlecode.lanterna.input.KeyType.ArrowDown;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-
 public class TUI {
 
-    public static void main(String[] args) throws IOException {
+    Terminal terminal;
+    Screen screen;
+    TextGraphics tg;
+
+    public TUI(String[] args) throws IOException {
         List<String> projects = new ArrayList<>();
         projects.add("project jira");
         projects.add("onTime google");
@@ -30,10 +29,13 @@ public class TUI {
         projects.add("dong bong");
         projects.add("helper");
         projects.add("python for java programmers");
-        Terminal terminal = new DefaultTerminalFactory().createTerminal();
+        System.out.println("test");
 
-        Screen screen = new TerminalScreen(terminal);
-        TextGraphics tg = screen.newTextGraphics();
+        DefaultTerminalFactory dtf = new DefaultTerminalFactory();
+
+        terminal = dtf.createTerminal();
+        screen = new TerminalScreen(terminal);
+        tg = screen.newTextGraphics();
 
         screen.startScreen();
         tg.putString(0, 1, "welcome to the minjira text user interface");
@@ -86,6 +88,9 @@ public class TUI {
         screen.readInput();
         screen.stopScreen();
         System.exit(0);
+    }
 
+    public static void main(String[] args) throws IOException {
+        new TUI(args);
     }
 }
