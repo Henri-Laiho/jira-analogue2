@@ -1,5 +1,6 @@
 package client;
 
+import apacheUI.TUI;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
@@ -24,10 +25,10 @@ public class ClientMain {
             else {
 
                 // TODO: search on server side
-                System.out.print("Searching for project ==> " + searchTerm);
+                System.out.print("Searching for project list ==> " + searchTerm);
                 if (projectList.contains(searchTerm)) {
                     Client client = new Client(args);
-                    //TUI.main(args);
+                    TUI.main(args);
                 }
                 else {
                     System.out.println("project not found in database");
@@ -69,7 +70,6 @@ public class ClientMain {
 
     public static void main(String[] args) throws Exception {
         System.out.println("client.");
-
         commandLineUI(args);
     }
 }

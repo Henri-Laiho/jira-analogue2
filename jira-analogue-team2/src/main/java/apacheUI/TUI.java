@@ -40,6 +40,8 @@ public class TUI {
         screen.startScreen();
         tg.putString(0, 1, "welcome to the minjira text user interface");
         tg.putString(0, 2, "select project name (up and down arrow, hit enter to select):");
+        tg.putString(0, 22,"hit ESC to exit");
+        screen.refresh();
         boolean running = true;
         int i = 0;
 
@@ -56,10 +58,12 @@ public class TUI {
 
                     case ArrowUp:
                         if (i < projects.size() - 1) {
-                            //small glitch:
-                            //reaching the last element makes it go back to the second to last
-                            //also instantly assumes that enter is hit
                             i += 1;
+                            tg.putString(0, 3, "                            ");
+                            tg.putString(0, 3, projects.get(i), SGR.BOLD);
+                            break;
+                        }
+                        else {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
@@ -67,14 +71,19 @@ public class TUI {
 
                     case ArrowDown:
                         if (i > 0) {
-                            i += -1;
+                            i -= 1;
+                            tg.putString(0, 3, "                            ");
+                            tg.putString(0, 3, projects.get(i), SGR.BOLD);
+                            break;
+                        }
+                        else {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
                         }
                     case Enter:
                         tg.putString(0, 4, "                                                                                      ");
-                        tg.putString(0,4, "you have selected: " + projects.get(i));
+                        tg.putString(0, 4, "you have selected: " + projects.get(i));
                         //insert opening project method/new screen method
                         //
                         //here
