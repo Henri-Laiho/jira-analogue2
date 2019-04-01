@@ -41,7 +41,7 @@ public class TUI {
         screen.startScreen();
         tg.putString(0, 1, "welcome to the minjira text user interface");
         tg.putString(0, 2, "select project name (up and down arrow, hit enter to select):");
-        tg.putString(0, 22,"hit ESC to exit");
+        tg.putString(0, 22, "hit ESC to exit");
         screen.refresh();
         boolean running = true;
         int i = 0;
@@ -64,8 +64,7 @@ public class TUI {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
-                        }
-                        else {
+                        } else {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
@@ -77,8 +76,7 @@ public class TUI {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
-                        }
-                        else {
+                        } else {
                             tg.putString(0, 3, "                            ");
                             tg.putString(0, 3, projects.get(i), SGR.BOLD);
                             break;
@@ -87,7 +85,7 @@ public class TUI {
                         hit = true;
                         tg.putString(0, 4, "                                                                                      ");
                         tg.putString(0, 4, "you have selected: " + projects.get(i), SGR.ITALIC);
-                        tg.putString(0, 5,"hit rightarrow to open");
+                        tg.putString(0, 5, "hit rightarrow to open");
                         break;
                     case ArrowRight:
                         if (hit) {
@@ -102,7 +100,11 @@ public class TUI {
                             //method here
                             break;
                         }
-
+                    case EOF:
+                        running = false;
+                        break;
+                    default:
+                        break;
                 }
                 screen.refresh();
             }
