@@ -50,27 +50,26 @@ public class TUI {
             System.out.println(pressed);
             switch ((pressed.getKeyType())) {
                 case Escape:
+                case EOF: // This will happen if you close the window using X in the corner.
                     running = false;
                     break;
 
                 case ArrowUp:
                     if (i < projects.size() - 1) {
-                        //small glitch:
-                        //reaching the last element makes it go back to the second to last
-                        //also instantly assumes that enter is hit
                         i += 1;
                         tg.putString(0, 3, "                            ");
                         tg.putString(0, 3, projects.get(i), SGR.BOLD);
-                        break;
                     }
+                    break;
 
                 case ArrowDown:
                     if (i > 0) {
                         i += -1;
                         tg.putString(0, 3, "                            ");
                         tg.putString(0, 3, projects.get(i), SGR.BOLD);
-                        break;
                     }
+                    break;
+
                 case Enter:
                     tg.putString(0, 4, "                                                                                      ");
                     tg.putString(0, 4, "you have selected: " + projects.get(i));
