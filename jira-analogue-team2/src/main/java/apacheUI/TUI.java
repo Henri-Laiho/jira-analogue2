@@ -43,45 +43,44 @@ public class TUI {
         boolean running = true;
         int i = 0;
 
+        tg.putString(0, 3, projects.get(i), SGR.BOLD);
+        screen.refresh();
+
         while (running) {
+            KeyStroke pressed = terminal.readInput();
 
-            KeyStroke pressed = terminal.pollInput();
+            System.out.println(pressed);
+            switch ((pressed.getKeyType())) {
+                case Escape:
+                case EOF: // This will happen if you close the window using X in the corner.
+                    running = false;
+                    break;
 
-            if (pressed != null) {
-                System.out.println(pressed);
-                switch ((pressed.getKeyType())) {
-                    case Escape:
-                        running = false;
-                        break;
+                case ArrowUp:
+                    if (i < projects.size() - 1) {
+                        i += 1;
+                        tg.putString(0, 3, "                            ");
+                        tg.putString(0, 3, projects.get(i), SGR.BOLD);
+                    }
+                    break;
 
-                    case ArrowUp:
-                        if (i < projects.size() - 1) {
-                            //small glitch:
-                            //reaching the last element makes it go back to the second to last
-                            //also instantly assumes that enter is hit
-                            i += 1;
-                            tg.putString(0, 3, "                            ");
-                            tg.putString(0, 3, projects.get(i), SGR.BOLD);
-                            break;
-                        }
+                case ArrowDown:
+                    if (i > 0) {
+                        i += -1;
+                        tg.putString(0, 3, "                            ");
+                        tg.putString(0, 3, projects.get(i), SGR.BOLD);
+                    }
+                    break;
 
-                    case ArrowDown:
-                        if (i > 0) {
-                            i += -1;
-                            tg.putString(0, 3, "                            ");
-                            tg.putString(0, 3, projects.get(i), SGR.BOLD);
-                            break;
-                        }
-                    case Enter:
-                        tg.putString(0, 4, "                                                                                      ");
-                        tg.putString(0,4, "you have selected: " + projects.get(i));
-                        //insert opening project method/new screen method
-                        //
-                        //here
-                        break;
-                }
-                screen.refresh();
+                case Enter:
+                    tg.putString(0, 4, "                                                                                      ");
+                    tg.putString(0, 4, "you have selected: " + projects.get(i));
+                    //insert opening project method/new screen method
+                    //
+                    //here
+                    break;
             }
+            screen.refresh();
 
         }
         screen.refresh();
