@@ -12,6 +12,7 @@ import com.googlecode.lanterna.terminal.virtual.DefaultVirtualTerminal;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TUI {
 
@@ -19,7 +20,7 @@ public class TUI {
     Screen screen;
     TextGraphics tg;
 
-    public TUI(String[] args) throws IOException {
+    public TUI(String[] args) throws IOException, InterruptedException {
         List<String> projects = new ArrayList<>();
         projects.add("project jira");
         projects.add("onTime google");
@@ -44,6 +45,7 @@ public class TUI {
         screen.refresh();
         boolean running = true;
         int i = 0;
+        boolean hit = false;
 
         while (running) {
 
@@ -82,12 +84,25 @@ public class TUI {
                             break;
                         }
                     case Enter:
+                        hit = true;
                         tg.putString(0, 4, "                                                                                      ");
-                        tg.putString(0, 4, "you have selected: " + projects.get(i));
-                        //insert opening project method/new screen method
-                        //
-                        //here
+                        tg.putString(0, 4, "you have selected: " + projects.get(i), SGR.ITALIC);
+                        tg.putString(0, 5,"hit rightarrow to open");
                         break;
+                    case ArrowRight:
+                        if (hit) {
+                            tg.putString(0, 7, "opening project...", SGR.BOLD);
+                            screen.refresh();
+
+                            TimeUnit.SECONDS.sleep(2);
+                            tg.putString(0, 7, "                               ");
+                            //insert actual opening of project
+                            //method here
+                            //
+                            //method here
+                            break;
+                        }
+
                 }
                 screen.refresh();
             }
@@ -96,10 +111,11 @@ public class TUI {
         screen.refresh();
         screen.readInput();
         screen.stopScreen();
+
         System.exit(0);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         new TUI(args);
     }
 }
