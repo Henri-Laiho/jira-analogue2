@@ -43,8 +43,10 @@ public class TUI {
         boolean running = true;
         int i = 0;
 
-        while (running) {
+        tg.putString(0, 3, projects.get(i), SGR.BOLD);
+        screen.refresh();
 
+        while (running) {
             KeyStroke pressed = terminal.readInput();
 
             System.out.println(pressed);
