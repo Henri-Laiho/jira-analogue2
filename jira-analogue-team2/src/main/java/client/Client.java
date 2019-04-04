@@ -28,11 +28,26 @@ public class Client implements JiraMessageHandler {
         tui = new TUI(this);
     }
 
+    /**
+     * Request the list of projects for this user from the server;
+     * (wait for response containing the list;)
+     * and start terminal window.
+     * @param args
+     * @throws IOException
+     * @throws InterruptedException
+     */
     void startTUI(String[] args) throws IOException, InterruptedException {
         updateProjects();
         tui.startTerminal(args);
     }
 
+    /**
+     * Request the list of projects for this user from the server;
+     * and wait for response containing the list.
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     boolean updateProjects() throws IOException, InterruptedException {
         if (reconnect()) {
             connection.sendMessage(new GetProjectListMessage());
@@ -43,10 +58,21 @@ public class Client implements JiraMessageHandler {
 
     }
 
+    /**
+     * @return true if the connection is not closed and not null, false otherwise.
+     */
     boolean isConnected() {
         return connection != null && !connection.isClosed();
     }
 
+    /**
+     * Tries to connect to the server until the server accepts the connection.
+     * @param serverIP server IP.
+     * @param port server Port.
+     * @param session the session from previous login or null if not yet logged in.
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private void connect(String serverIP, int port, Session session) throws IOException, InterruptedException {
         System.out.print("Connecting..");
         Connection old = connection;
@@ -104,6 +130,13 @@ public class Client implements JiraMessageHandler {
         return false;
     }
 
+    /**
+     * Try to log in to the server
+     * @param username username or email.
+     * @param password password.
+     * @return true if logged in succesfully, false otherwise.
+     * @throws IOException
+     */
     boolean login(String username, String password) throws IOException {
         this.username = username;
         if (isConnected()) {
@@ -113,7 +146,7 @@ public class Client implements JiraMessageHandler {
         } else return false;
     }
 
-
+    // See the JiraMessageHandler interface for more details on the following methods:
     @Override
     public ErrorMessage createTask(CreateTaskMessage message) {
         return new ErrorMessage("Invalid request on client side");

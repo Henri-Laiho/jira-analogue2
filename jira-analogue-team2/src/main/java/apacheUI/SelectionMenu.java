@@ -28,18 +28,14 @@ class SelectionMenu extends KeyBoardTUIElement {
         super(terminal, screen, tg);
     }
 
-    SelectionMenu(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS) {
-        super(terminal, screen, tg, pollDelayMS);
-    }
-
-    SelectionMenu(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS, List<String> selection) {
-        super(terminal, screen, tg, pollDelayMS);
+    SelectionMenu(Terminal terminal, Screen screen, TextGraphics tg, List<String> selection) {
+        super(terminal, screen, tg);
         if (selection != null)
             this.selection = selection;
     }
 
-    SelectionMenu(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS, List<String> selection, SelectionMenuListener listener) {
-        super(terminal, screen, tg, pollDelayMS);
+    SelectionMenu(Terminal terminal, Screen screen, TextGraphics tg, List<String> selection, SelectionMenuListener listener) {
+        super(terminal, screen, tg);
         if (selection != null)
             this.selection = selection;
         this.listener = listener;

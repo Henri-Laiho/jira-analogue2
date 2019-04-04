@@ -13,6 +13,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Text User Interface
+ *
+ *
+ *
+ * Calling startTerminal() creates a terminal window and starts interacting
+ * with the user. See startTerminal() javadoc for details.
+ *
+ * Usage:
+ * 1. Initialize a TUI object; TUI tui = new TUI(client);
+ * 2. Set the list of projects; tui.setProjects(...)
+ * 3. call startTerminal().
+ */
+
 public class TUI {
     private List<String> projects;
     private String displayUsername = "";
@@ -23,10 +37,32 @@ public class TUI {
     private Screen screen;
     private TextGraphics tg;
 
+    /**
+     * Set the terminal loops to break at the next iteration.
+     */
     public void stopTerminal() {
         terminalRunning = false;
     }
 
+    /**
+     * Creates a new terminal window; Blocks until user exits the TUI or the terminal window gets closed.
+     *
+     * User will connect to server and log in using the Command Line Interface (CLI).
+     * TODO: User can add a search option with -s. If the search option was specified, this method
+     * TODO: will skip step 1. and select the project given in the search option.
+     *
+     * 1. Ask the user (SelectionMenu with arrow keys and enter to select) which project should be opened.
+     * TODO: 2. Show the list of tasks in the project and let the user select a task (SelectionMenu).
+     * TODO: The first entry in the list of tasks should be "Create new task"; if selected start creating
+     * TODO: a new task; ask the task name, description and if a new git branch should be created for the task.
+     * TODO: 3. Show the details of the selected task; Let user edit the task (select an item to edit with
+     * TODO: SelectionMenu and fill in new data with some input method).
+     *
+     * User can press ESC to exit a SelectionMenu and select another project (or task).
+     *
+     * @param args command line arguments, TODO: if contains search option, autoimatically search and open the project (request the project from server).
+     * @throws IOException if there is an i/o error
+     */
     public void startTerminal(String[] args) throws IOException {
         System.out.println("Opening terminal.");
 
@@ -47,7 +83,9 @@ public class TUI {
 
         while (terminalRunning) {
 
-            SelectionMenu selectionMenu = new SelectionMenu(terminal, screen, tg, 20, projects, itemIndex -> {
+            // Keep asking for a project to open
+
+            SelectionMenu selectionMenu = new SelectionMenu(terminal, screen, tg, projects, itemIndex -> {
 
                 if (itemIndex == -1) {
                     stopTerminal();
@@ -93,30 +131,36 @@ public class TUI {
         System.exit(0);
     }
 
+    /**
+     * Update the list of projects
+     * @param projects the list of project names
+     */
     public void setProjects(List<String> projects) {
         this.projects = projects;
     }
 
     /**
      * TODO: add username display somewhere on the TUI so the user can see who is currently logged in.
-     * @param displayUsername
+     * @param displayUsername username that can be displayed to the user to indicate which user is logged in.
      */
     public void setDisplayUsername(String displayUsername) {
         this.displayUsername = displayUsername;
     }
 
+    /**
+     * Initialize the TUI object and remember a reference to the client object to call methods that
+     * send requests to server when the user interacts with the user interface.
+     * @param client the client.
+     */
     public TUI(Client client) {
         this.client = client;
         System.out.println("TUI constructor");
-
-
     }
-
 
     /**
      * Main method so we can test the UI separately.
      *
-     * @param args
+     * @param args unused command line arguments
      * @throws IOException
      * @throws InterruptedException
      */

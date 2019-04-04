@@ -7,19 +7,22 @@ import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
 
+/**
+ * Abstract class for TUIElements that block and wait for keyboard input when run() is called
+ */
 abstract class KeyBoardTUIElement extends TUIElement {
 
     abstract boolean onKeyHit(KeyStroke keyStroke);
     //abstract boolean shouldContinue();
 
     private boolean running = false;
-    private int pollDelayMS = 20;
+    //private int pollDelayMS = 20;
 
     KeyBoardTUIElement(Terminal terminal, Screen screen, TextGraphics tg) {
         super(terminal, screen, tg);
     }
 
-    KeyBoardTUIElement(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS) {
+    /*KeyBoardTUIElement(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS) {
         super(terminal, screen, tg);
         setPollDelayMS(pollDelayMS);
     }
@@ -27,8 +30,11 @@ abstract class KeyBoardTUIElement extends TUIElement {
     void setPollDelayMS(int pollDelayMS) {
         if (pollDelayMS > 0)
             this.pollDelayMS = pollDelayMS;
-    }
+    }*/
 
+    /**
+     * Blocks and reads keyboard input until subclass onKeyHit() returns false.
+     */
     @Override
     public void run() {
         super.run();
@@ -42,16 +48,16 @@ abstract class KeyBoardTUIElement extends TUIElement {
                     running = onKeyHit(pressed);
                     screen.refresh();
                 }
-                else {
+                /*else {
                     Thread.sleep(pollDelayMS);
-                }
+                }*/
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } catch (InterruptedException e) {
+            } /*catch (InterruptedException e) {
                 throw new RuntimeException(e);
                 //running = false;
                 //return;
-            }
+            }*/
         }
         running = false;
     }
