@@ -1,6 +1,6 @@
 package client;
 
-import apacheUI.TUI;
+import common.Connection;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
@@ -9,48 +9,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientMain {
-    private static void connectToServer(String serverName, CommandLine cmd, List<String> projectList, String[] args) throws IOException {
-        // TODO: open connection
-        boolean establishedConnection = true;
+    private static boolean connectToServer(String serverName, CommandLine cmd, Client client) throws IOException, InterruptedException {
 
-        if (establishedConnection) {
-            Options connectedOptions = new Options();
-            connectedOptions.addOption("s", "search", true, "search for project name")
-                    .addOption("log", "login", true, "command to log into specified project");
-
-            String searchTerm = cmd.getOptionValue("s");
-            if (searchTerm == null || searchTerm.isEmpty()) {
-                System.out.println("Search term may not be empty");
-            }
-            else {
-
-                // TODO: search on server side
-                System.out.print("Searching for project list ==> " + searchTerm);
-                if (projectList.contains(searchTerm)) {
-                    Client client = new Client(args);
-                    TUI.main(args);
-                }
-                else {
-                    System.out.println("project not found in database");
-                }
-            }
-
+        // open connection
+        int port = Connection.DEFAULT_PORT;
+        String ip = serverName;
+        if (serverName.contains(":")) {
+            String[] parts = serverName.split(":");
+            ip = parts[0];
+            port = Integer.parseInt(parts[1]);
         }
+        client.connect(ip, port);
+
+        String user = cmd.getOptionValue("user");
+        String pass = cmd.getOptionValue("pass");
+
+        if (user != null && pass != null) {
+            if (client.login(user, pass)) {
+                System.out.println("User " + user + " logged in.");
+                return true;
+            }
+            else
+                System.out.println("Login failed.");
+        }
+        else {
+            System.out.println("Please log in (enter -user <username> and -pass <password>)");
+        }
+        return false;
+
+
+        // project selection on TUI main screen
+        /*String searchTerm = cmd.getOptionValue("s");
+        if (searchTerm == null || searchTerm.isEmpty()) {
+            System.out.println("Search term may not be empty");
+        } else {
+
+            System.out.print("Searching for project list ==> " + searchTerm);
+            if (projectList.contains(searchTerm)) {
+
+            } else {
+                System.out.println("project not found in database");
+            }
+        }*/
+
     }
 
-    private static void commandLineUI(String[] args) throws ParseException, IOException {
+    private static void commandLineUI(String[] args) throws ParseException, IOException, InterruptedException {
         Options options = new Options();
-        options.addOption("c", "connect", true, "Send connect request to server(with name).")
+        options.addOption("c", "connect", true, "Send connect request to server(with name and port separated by ':').")
                 .addOption("h", "help", false, "print this message")
-                .addOption("version", "print the version information and exit");
+                .addOption("v", "version", false, "print the version information and exit")
+                .addOption("s", "search", true, "search for project name")
+                .addOption("user", "username", true, "command to log in with this username or email")
+                .addOption("pass", "password", true, "command to log in with this password");
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd = parser.parse(options, args);
         String serverName = cmd.getOptionValue("c");
 
         List<String> serverList = new ArrayList<>();
-        List<String> projectList = new ArrayList<>();
-        serverList.add("test");
-        projectList.add("testproject");
+        //List<String> projectList = new ArrayList<>();
+        serverList.add("localhost:" + Connection.DEFAULT_PORT);
+        //projectList.add("testproject");
+
+        Client client = new Client();
 
         if (cmd.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
@@ -58,11 +79,11 @@ public class ClientMain {
             final PrintWriter writer = new PrintWriter(System.out);
             formatter.printUsage(writer, 80, "Jira Analogue", options);
             writer.flush();
-        } else if (!cmd.hasOption("c") || serverName == null || !serverList.contains(serverName)) {
+        } else if (!cmd.hasOption("c") || serverName == null/* || !serverList.contains(serverName)*/) {
             System.out.println("Please establish connection with specific server (enter -c with server name)");
             System.exit(1);
-        } else {
-            connectToServer(serverName, cmd, projectList, args);
+        } else if (connectToServer(serverName, cmd, client)) {
+            client.startTUI(args);
         }
 
 

@@ -5,5 +5,7 @@ public class ServerMain {
         System.out.println("server.");
 
         Server server = new Server();
+        server.loadData();
+        server.run();
     }
 }
