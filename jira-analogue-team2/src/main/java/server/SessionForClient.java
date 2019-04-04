@@ -33,7 +33,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
 
     @Override
     public void run() {
-        while(!connection.isClosed()) {
+        while (!connection.isClosed()) {
             try {
                 connection.readMessage();
             } catch (IOException e) {
@@ -41,6 +41,21 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
             }
 
         }
+    }
+
+    public void runSingleRequest() {
+        try {
+            // login / session
+            if (!connection.isClosed())
+                connection.readMessage();
+            // request
+            if (!connection.isClosed())
+                connection.readMessage();
+            connection.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -110,8 +125,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
                         // send empty project name list
                         connection.sendMessage(new SetProjectListMessage(new RawProjectNameList(null, null)));
                         return null;
-                    }
-                    else {
+                    } else {
                         // send project name list
                         connection.sendMessage(new SetProjectListMessage(Project.getProjectNameList(projects)));
                         return null;

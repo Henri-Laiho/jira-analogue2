@@ -35,7 +35,7 @@ abstract class KeyBoardTUIElement extends TUIElement {
         running = true;
         while (running/* && shouldContinue()*/) {
             try {
-                KeyStroke pressed = terminal.pollInput();
+                KeyStroke pressed = terminal.readInput();
 
                 if (pressed != null) {
                     System.out.println(pressed);

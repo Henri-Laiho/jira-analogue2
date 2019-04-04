@@ -187,4 +187,33 @@ class Server implements Runnable {
             throw new RuntimeException(e);
         }
     }
+
+    public void runSingleThread() {
+        // allocate port on all available IP addresses
+        try (ServerSocket ss = new ServerSocket(port)) {
+
+            // wait for an incoming connection
+            System.out.println("Listening on port " + port);
+            running = true;
+            while (running) {
+                try {
+                    Socket socket = ss.accept();
+                    SessionForClient session = new SessionForClient(this, socket);
+
+                    session.runSingleRequest();
+
+                    System.out.println("New Connection on port " + port + " from " + socket.getInetAddress().getHostName() + ".");
+                } catch (IOException e) {
+                    System.out.println("Stopping server.");
+                    running = false;
+                    throw new RuntimeException(e);
+                    //break;
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to start server.");
+            running = false;
+            throw new RuntimeException(e);
+        }
+    }
 }

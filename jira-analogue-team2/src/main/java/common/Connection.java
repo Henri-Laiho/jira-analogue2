@@ -24,7 +24,7 @@ import java.net.Socket;
  *
  */
 public class Connection extends Message implements Closeable {
-    public static final int DEFAULT_PORT = 28012;
+    public static final int DEFAULT_PORT = 28015;
 
     private Socket socket;
 

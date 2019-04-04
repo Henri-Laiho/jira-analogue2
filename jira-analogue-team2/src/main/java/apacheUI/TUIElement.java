@@ -5,6 +5,9 @@ import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 
+/**
+ *
+ */
 abstract class TUIElement implements Runnable {
     Terminal terminal;
     Screen screen;
@@ -17,6 +20,7 @@ abstract class TUIElement implements Runnable {
         this.terminal = terminal;
         this.screen = screen;
         this.tg = tg;
+        tg.putString(1, 2, "test");
     }
 
     public void setBackground(TextColor background) {
