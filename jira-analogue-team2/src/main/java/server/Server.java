@@ -94,7 +94,7 @@ class Server implements Runnable {
 
     void initialize() {
         for (Project project : projects) {
-            project.initialize(users);
+            project.initialize(users, projects);
         }
         for (User user : users) {
             user.initialize(users, projects);

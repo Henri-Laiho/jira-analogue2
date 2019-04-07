@@ -3,6 +3,8 @@ package client;
 import apacheUI.TUI;
 import common.Connection;
 import common.Project;
+import common.Task;
+import common.User;
 import data.RawLogin;
 import data.RawProject;
 import data.RawProjectNameList;
@@ -23,6 +25,7 @@ public class Client implements JiraMessageHandler {
     private String username;
     private RawProjectNameList projectNameList;
     private Project openedProject;
+    private User user;
 
     Client() {
         tui = new TUI(this);
@@ -39,6 +42,36 @@ public class Client implements JiraMessageHandler {
     void startTUI(String[] args) throws IOException, InterruptedException {
         updateProjects();
         tui.startTerminal(args);
+    }
+
+    public long getUserId() {
+        return user == null ? -1 : user.getUserId();
+    }
+
+    public int getUserRightsInProject() {
+        if (user != null)
+            return user.getRightsInProject(openedProject);
+        else throw new RuntimeException("getUserRightsInProject when user is null");
+    }
+
+    public Project getOpenedProject() {
+        return openedProject;
+    }
+
+    public boolean sendUpdateTask(Task task) throws IOException, InterruptedException {
+        if (reconnect()) {
+            connection.sendMessage(new UpdateTaskMessage(task.toRawTask()));
+            return true;
+        }
+        return false;
+    }
+
+    public boolean sendCreateTask(Task task) throws IOException, InterruptedException {
+        if (reconnect()) {
+            connection.sendMessage(new CreateTaskMessage(task.toRawTask()));
+            return true;
+        }
+        return false;
     }
 
     /**

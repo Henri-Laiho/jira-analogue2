@@ -48,17 +48,11 @@ abstract class KeyBoardTUIElement extends TUIElement {
                     running = onKeyHit(pressed);
                     screen.refresh();
                 }
-                /*else {
-                    Thread.sleep(pollDelayMS);
-                }*/
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } /*catch (InterruptedException e) {
-                throw new RuntimeException(e);
-                //running = false;
-                //return;
-            }*/
+            }
         }
         running = false;
     }
+
 }

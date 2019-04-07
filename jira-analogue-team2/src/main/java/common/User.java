@@ -83,6 +83,13 @@ public class User {
         return projects;
     }
 
+    public int getRightsInProject(Project project) {
+        if (projectRights != null)
+            return projectRights.get(project);
+        // return no rights
+        return 0;
+    }
+
     private RawUser rawUser;
 
     private long userId;

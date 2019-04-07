@@ -3,16 +3,20 @@ package common;
 import data.RawProject;
 import data.RawProjectNameList;
 import data.RawTask;
+import data.RawUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Project {
 
+    private static final long MAX_TASKS = Short.MAX_VALUE;
     private long projectId = -1;
     private List<Task> tasklist = new ArrayList<>();
     private String projectName = null;
     private String repositoryUrl = null;
+    private long lastTaskID = -1;
 
     public Project(RawProject data) {
         projectId = data.projectId;
@@ -24,9 +28,9 @@ public class Project {
         }
     }
 
-    public void initialize(List<User> users) {
+    public void initialize(List<User> users, List<Project> projects) {
         for (Task task : tasklist) {
-            task.initialize(tasklist, users);
+            task.initialize(tasklist, users, projects);
         }
     }
 
@@ -44,6 +48,28 @@ public class Project {
 
     public String getRepositoryUrl() {
         return repositoryUrl;
+    }
+
+    public long getNewValidTaskId() {
+        long newID = lastTaskID;
+        while(true) {
+            newID++;
+            boolean valid = true;
+            for (Task task : tasklist) {
+                if (task.getTaskId() == newID) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (valid) break;
+
+            if (newID == MAX_TASKS)
+                newID = 0;
+            if (newID == lastTaskID-1)
+                return -1;
+        }
+        lastTaskID = newID;
+        return newID;
     }
 
     public static RawProjectNameList getProjectNameList(List<Project> projects) {
