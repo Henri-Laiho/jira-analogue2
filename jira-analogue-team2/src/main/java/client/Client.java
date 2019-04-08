@@ -5,13 +5,10 @@ import common.Connection;
 import common.Project;
 import common.Task;
 import common.User;
-import data.RawLogin;
-import data.RawProject;
-import data.RawProjectNameList;
+import data.*;
 import messages.JiraMessageHandler;
 import messages.MessageType;
 import messages.Session;
-import messages.messagetypes.*;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -60,7 +57,7 @@ public class Client implements JiraMessageHandler {
 
     public boolean sendUpdateTask(Task task) throws IOException, InterruptedException {
         if (reconnect()) {
-            connection.sendMessage(new UpdateTaskMessage(task.toRawTask()));
+            connection.sendMessage(task.toRawTask(), MessageType.UPDATETASK);
             return true;
         }
         return false;
@@ -68,7 +65,7 @@ public class Client implements JiraMessageHandler {
 
     public boolean sendCreateTask(Task task) throws IOException, InterruptedException {
         if (reconnect()) {
-            connection.sendMessage(new CreateTaskMessage(task.toRawTask()));
+            connection.sendMessage(task.toRawTask(), MessageType.CREATETASK);
             return true;
         }
         return false;
@@ -83,7 +80,7 @@ public class Client implements JiraMessageHandler {
      */
     boolean updateProjects() throws IOException, InterruptedException {
         if (reconnect()) {
-            connection.sendMessage(new GetProjectListMessage());
+            connection.sendMessage(null, MessageType.GETPROJECTLIST);
             return connection.readMessage() == MessageType.SETPROJECTLIST;
         }
         return false;
@@ -157,7 +154,7 @@ public class Client implements JiraMessageHandler {
      */
     public boolean selectProject(int index) throws IOException, InterruptedException {
         if (reconnect()) {
-            connection.sendMessage(new GetProjectMessage(projectNameList.projectIds[index]));
+            connection.sendMessage(projectNameList.projectIds[index], MessageType.GETPROJECT);
             return connection.readMessage() == MessageType.SETPROJECT;
         }
         return false;
@@ -174,36 +171,36 @@ public class Client implements JiraMessageHandler {
         this.username = username;
         if (isConnected()) {
             System.out.println("Logging in.");
-            connection.sendMessage(new LoginMessage(new RawLogin(username, password)));
+            connection.sendMessage(new RawLogin(username, password), MessageType.LOGIN);
             return connection.readMessage() == MessageType.SETSESSION;
         } else return false;
     }
 
     // See the JiraMessageHandler interface for more details on the following methods:
     @Override
-    public ErrorMessage createTask(CreateTaskMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError createTask(RawTask message) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage removeTask(RemoveTaskMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError removeTask(Long taskId) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage updateTask(UpdateTaskMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError updateTask(RawTask message) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage getServerTaskList(GetServerTaskListMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError getServerTaskList(Object message) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage setSession(SetSessionMessage message) {
-        clientSession = (Session) message.getData();
-        if (clientSession != null)
+    public RawError setSession(RawSession session) {
+        clientSession = new Session(session.sessionKey, -1, -1, connection.getMyIP(), connection.getMyPort(), connection.getOtherIP(), connection.getOtherPort());
+        if (session.sessionKey.length == 16)
             tui.setDisplayUsername(username);
         else
             tui.setDisplayUsername("");
@@ -211,30 +208,30 @@ public class Client implements JiraMessageHandler {
     }
 
     @Override
-    public ErrorMessage login(LoginMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError login(RawLogin message) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage getProjectList(GetProjectListMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError getProjectList() {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage setProjectList(SetProjectListMessage message) {
-        projectNameList = (RawProjectNameList)message.getData();
+    public RawError setProjectList(RawProjectNameList message) {
+        projectNameList = message;
         tui.setProjects(Arrays.asList(projectNameList.projectNames));
         return null;
     }
 
     @Override
-    public ErrorMessage getProject(GetProjectMessage message) {
-        return new ErrorMessage("Invalid request on client side");
+    public RawError getProject(Long message) {
+        return new RawError("Invalid request on client side");
     }
 
     @Override
-    public ErrorMessage setProject(SetProjectMessage message) {
-        openedProject = new Project((RawProject) message.getData());
+    public RawError setProject(RawProject message) {
+        openedProject = new Project(message);
         return null;
     }
 }

@@ -1,7 +1,7 @@
 package common;
 
 import messages.JiraMessageHandler;
-import messages.Message;
+import messages.ProtocolConnection;
 import messages.Session;
 
 import java.io.Closeable;
@@ -23,7 +23,7 @@ import java.net.Socket;
  * {@code try(common.Connection connection = new common.Connection(client, new Socket(ip, port))) {//send messages and requests to server}}
  *
  */
-public class Connection extends Message implements Closeable {
+public class Connection extends ProtocolConnection implements Closeable {
     public static final int DEFAULT_PORT = 28015;
 
     private Socket socket;
