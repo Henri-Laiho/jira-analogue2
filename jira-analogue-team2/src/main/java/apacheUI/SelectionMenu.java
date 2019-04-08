@@ -50,7 +50,7 @@ class SelectionMenu extends KeyBoardTUIElement {
             this.selection.clear();
     }
 
-    void setOnItemSelectedListener(SelectionMenuListener listener) {
+    void setSelectionMenuListener(SelectionMenuListener listener) {
         this.listener = listener;
     }
 
@@ -89,8 +89,8 @@ class SelectionMenu extends KeyBoardTUIElement {
                     tg.putString(0, 4, "                                                                                      ");
                     tg.putString(0, 4, "you have selected: " + selection.get(index), SGR.ITALIC);
                     selectedIndex = index;
-                    if (listener != null && listener.onItemSelected(index))
-                        ;
+                    if (listener != null)
+                        return listener.onItemSelected(index);
                 }
                 break;
             /*case ArrowRight: //should open by just pressing enter

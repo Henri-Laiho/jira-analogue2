@@ -16,21 +16,10 @@ abstract class KeyBoardTUIElement extends TUIElement {
     //abstract boolean shouldContinue();
 
     private boolean running = false;
-    //private int pollDelayMS = 20;
 
     KeyBoardTUIElement(Terminal terminal, Screen screen, TextGraphics tg) {
         super(terminal, screen, tg);
     }
-
-    /*KeyBoardTUIElement(Terminal terminal, Screen screen, TextGraphics tg, int pollDelayMS) {
-        super(terminal, screen, tg);
-        setPollDelayMS(pollDelayMS);
-    }
-
-    void setPollDelayMS(int pollDelayMS) {
-        if (pollDelayMS > 0)
-            this.pollDelayMS = pollDelayMS;
-    }*/
 
     /**
      * Blocks and reads keyboard input until subclass onKeyHit() returns false.
@@ -41,12 +30,12 @@ abstract class KeyBoardTUIElement extends TUIElement {
         running = true;
         while (running/* && shouldContinue()*/) {
             try {
-                KeyStroke pressed = terminal.readInput();
+                KeyStroke pressed = readInput();
 
                 if (pressed != null) {
                     System.out.println(pressed);
                     running = onKeyHit(pressed);
-                    screen.refresh();
+                    refresh();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

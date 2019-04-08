@@ -1,17 +1,21 @@
 package apacheUI;
 
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
+import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
+
+import java.io.IOException;
 
 /**
  * Abstract class for Text User Interface elements like the SelectionMenu and other widgets used in the TUI
  * that should be reusable.
  */
 abstract class TUIElement implements Runnable {
-    Terminal terminal;
-    Screen screen;
+    private Terminal terminal;
+    private Screen screen;
     TextGraphics tg;
     private TextColor foreground;
     private TextColor background;
@@ -53,6 +57,43 @@ abstract class TUIElement implements Runnable {
         if (parent == null)
             return column+relativeColumn;
         return parent.getAbsoluteColumn(column+relativeColumn);
+    }
+
+    String nChars(int n, char c) {
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++){
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    void setPosition(int row, int column) {
+        this.row = row;
+        this.column = column;
+    }
+
+    void refresh() throws IOException {
+        screen.refresh();
+    }
+
+    KeyStroke readInput() throws IOException {
+        return terminal.readInput();
+    }
+
+    void putString(int column, int row, String string) {
+        tg.putString(getAbsoluteColumn(column), getAbsoluteRow(row), string);
+    }
+
+    void setBackgroundColor(TextColor color) {
+        tg.setBackgroundColor(color);
+    }
+
+    void setForegroundColor(TextColor color) {
+        tg.setForegroundColor(color);
+    }
+
+    void putCursor(int column, int row) throws IOException {
+        screen.setCursorPosition(new TerminalPosition(getAbsoluteColumn(column), getAbsoluteRow(row)));
     }
 
     /**
