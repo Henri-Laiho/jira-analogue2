@@ -2,6 +2,7 @@ package apacheUI;
 
 import client.Client;
 import com.googlecode.lanterna.SGR;
+import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
@@ -40,6 +41,7 @@ public class TUI {
     private Terminal terminal;
     private Screen screen;
     private TextGraphics tg;
+    private TextGraphics bg;
 
     /**
      * Set the terminal loops to break at the next iteration.
@@ -67,7 +69,7 @@ public class TUI {
      * @param args command line arguments, TODO: if contains search option, autoimatically search and open the project (request the project from server).
      * @throws IOException if there is an i/o error
      */
-    public void startTerminal(String[] args) throws IOException {
+    public void startTerminal(String[] args) throws IOException, InterruptedException {
         System.out.println("Opening terminal.");
 
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
@@ -75,18 +77,22 @@ public class TUI {
         terminal = dtf.createTerminal();
         screen = new TerminalScreen(terminal);
         tg = screen.newTextGraphics();
+        bg = screen.newTextGraphics();
 
         screen.startScreen();
-        tg.putString(0, 1, "welcome to the minjira text user interface");
-        tg.putString(0, 2, "select project name (up and down arrow, hit enter to select):");
-        tg.putString(0, 22, "hit ESC to exit");
+        bg.setBackgroundColor(TextColor.ANSI.BLACK);
+        tg.putString(6, 4, "welcome to the minjira text user interface");
+        tg.putString(6, 5, "select project name (up and down arrow, hit enter to select):");
+        tg.putString(6, 25, "hit ESC to exit");
+        TUIBorders tuiBorders = new TUIBorders(screen, bg);
+        tuiBorders.runBorder();
         screen.refresh();
         terminalRunning = true;
         int i = 0;
         boolean hit = false;
 
-        while (terminalRunning) {
 
+        while (terminalRunning) {
             // Keep asking for a project to open
 
             SelectionMenu selectionMenu = new SelectionMenu(terminal, screen, tg, projects);
@@ -96,8 +102,7 @@ public class TUI {
                 stopTerminal();
                 continue;
             }
-
-            tg.putString(0, 7, "opening project...", SGR.BOLD);
+            tg.putString(6, 8, "opening project...", SGR.BOLD);
             screen.refresh();
 
             // a useless delay to make the user think a project is being downloaded from the server
@@ -106,7 +111,7 @@ public class TUI {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            tg.putString(0, 7, "                               ");
+            tg.putString(6, 8, "                               ");
 
             // open project
             boolean canOpenProject;

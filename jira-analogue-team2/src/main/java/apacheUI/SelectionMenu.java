@@ -64,30 +64,30 @@ class SelectionMenu extends KeyBoardTUIElement {
             case ArrowUp:
                 if (index < selection.size()-1) {
                     index += 1;
-                    tg.putString(0, 3, "                            ");
-                    tg.putString(0, 3, selection.get(index), SGR.BOLD);
+                    tg.putString(6, 7, "                            ");
+                    tg.putString(6, 7, selection.get(index), SGR.BOLD);
                     break;
                 } else if (!selection.isEmpty()) {
-                    tg.putString(0, 3, "                            ");
-                    tg.putString(0, 3, selection.get(index), SGR.BOLD);
+                    tg.putString(6, 7, "                            ");
+                    tg.putString(6, 7, selection.get(index), SGR.BOLD);
                     break;
                 }
 
             case ArrowDown:
                 if (index > 0) {
                     index -= 1;
-                    tg.putString(0, 3, "                            ");
-                    tg.putString(0, 3, selection.get(index), SGR.BOLD);
+                    tg.putString(6, 7, "                            ");
+                    tg.putString(6, 7, selection.get(index), SGR.BOLD);
                     break;
                 } else if (!selection.isEmpty()) {
-                    tg.putString(0, 3, "                            ");
-                    tg.putString(0, 3, selection.get(index), SGR.BOLD);
+                    tg.putString(6, 7, "                            ");
+                    tg.putString(6, 7, selection.get(index), SGR.BOLD);
                     break;
                 }
             case Enter:
                 if (!selection.isEmpty()) {
-                    tg.putString(0, 4, "                                                                                      ");
-                    tg.putString(0, 4, "you have selected: " + selection.get(index), SGR.ITALIC);
+                    tg.putString(6, 8, "                                                                                      ");
+                    tg.putString(6, 8, "you have selected: " + selection.get(index), SGR.ITALIC);
                     selectedIndex = index;
                     if (listener != null)
                         return listener.onItemSelected(index);

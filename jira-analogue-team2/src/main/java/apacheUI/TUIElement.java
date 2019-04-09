@@ -17,6 +17,7 @@ abstract class TUIElement implements Runnable {
     private Terminal terminal;
     private Screen screen;
     TextGraphics tg;
+    TextGraphics bg;
     private TextColor foreground;
     private TextColor background;
     private TUIElement parent;
@@ -106,6 +107,12 @@ abstract class TUIElement implements Runnable {
         this.terminal = terminal;
         this.screen = screen;
         this.tg = tg;
+        this.parent = null;
+    }
+
+    TUIElement(Screen screen, TextGraphics bg) {
+        this.screen = screen;
+        this.bg = bg;
         this.parent = null;
     }
 
