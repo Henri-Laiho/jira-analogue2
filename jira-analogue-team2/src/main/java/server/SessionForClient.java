@@ -96,7 +96,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
                         session = new Session(SecurityHelper.generateSessionKey(), server.getNewValidSessID(), user.getUserId(),
                                 connection.getOtherIP(), connection.getOtherPort(), connection.getMyIP(), connection.getMyPort());
                         // send session information to client
-                        connection.sendMessage(session, MessageType.SETSESSION);
+                        connection.sendMessage(new RawSession(session.getSessionKey()), MessageType.SETSESSION);
                         // return no error
                         return null;
                     } else
