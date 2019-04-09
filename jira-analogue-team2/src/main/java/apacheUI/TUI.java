@@ -4,6 +4,9 @@ import client.Client;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
+import com.googlecode.lanterna.gui2.DefaultWindowManager;
+import com.googlecode.lanterna.gui2.EmptySpace;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -91,18 +94,99 @@ public class TUI {
         int i = 0;
         boolean hit = false;
 
+        MultiWindowTextGUI gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.BLUE));
 
         while (terminalRunning) {
+
             // Keep asking for a project to open
 
-            SelectionMenu selectionMenu = new SelectionMenu(terminal, screen, tg, projects);
+            ProjectSelector projectSelector = new ProjectSelector();
+            projectSelector.setListener(projectIndex -> {
+                // open project projectIndex
+
+                try {
+                    if (client.selectProject(projectIndex)) {
+                        if (client.getUserRightsInProject() > 0) {
+
+                            boolean editProject = true;
+                            while (terminalRunning && editProject) {
+                                Project project = client.getOpenedProject();
+                                List<String> titles = new ArrayList<>();
+                                List<String> completed = new ArrayList<>();
+                                List<String> priorities = new ArrayList<>();
+                                List<String> deadlines = new ArrayList<>();
+                                project.getTasklist().forEach(task -> {
+                                    titles.add(task.getTitle());
+                                    completed.add(task.isCompleted() ? "Done" : "Not Done");
+                                    priorities.add(String.valueOf(task.getPriority()));
+                                    deadlines.add(task.getDeadline().toString());
+                                });
+
+                                ProjectEditor projectEditor = new ProjectEditor();
+                                projectEditor.setListener(new ProjectEditor.TaskSelectedListener() {
+                                    @Override
+                                    public void taskSelected(int taskIndex) {
+                                        Task task = project.getTasklist().get(taskIndex);
+
+                                        projectEditor.close();
+                                        TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                            try {
+                                                client.sendUpdateTask(task);
+                                            } catch (IOException | InterruptedException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        });
+
+                                        projectEditor.close();
+                                        gui.addWindowAndWait(taskEditor);
+                                    }
+
+                                    @Override
+                                    public void createTask() {
+                                        Task task = new Task(new RawTask(project.getNewValidTaskId(), false, "Enter Title",
+                                                "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
+                                                null, null, null));
+
+                                        TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                            try {
+                                                client.sendCreateTask(task);
+                                            } catch (IOException | InterruptedException e) {
+                                                throw new RuntimeException(e);
+                                            }
+                                        });
+
+                                        projectEditor.close();
+                                        gui.addWindowAndWait(taskEditor);
+                                    }
+                                });
+
+                                projectEditor.setTaskList(titles, priorities, deadlines, completed);
+                                projectSelector.close();
+                                gui.addWindowAndWait(projectEditor);
+                            }
+
+                            // projectUi(client.getOpenedProject(), client.getUserRightsInProject());
+                        } else System.out.println("You dont have rights to view this project.");
+                    } else System.out.println("Failed to open project.");
+                } catch (IOException | InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            });
+            projectSelector.setProjectList(projects);
+
+            gui.addWindowAndWait(projectSelector);
+
+            /*SelectionMenu selectionMenu = new SelectionMenu(terminal, screen, tg, projects);
             int itemIndex = selectionMenu.runForSelectedItemIndex();
 
             if (itemIndex == -1) {
                 stopTerminal();
                 continue;
             }
-            tg.putString(6, 8, "opening project...", SGR.BOLD);
+
+            tg.putString(0, 7, "opening project...", SGR.BOLD);
             screen.refresh();
 
             // a useless delay to make the user think a project is being downloaded from the server
@@ -111,7 +195,7 @@ public class TUI {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            tg.putString(6, 8, "                               ");
+            tg.putString(0, 7, "                               ");
 
             // open project
             boolean canOpenProject;
@@ -125,7 +209,7 @@ public class TUI {
 
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
-            }
+            }*/
 
 
         }
@@ -140,6 +224,7 @@ public class TUI {
 
     /**
      * Lets the user edit a project: view tasks and create more.
+     *
      * @param openedProject the project to display to the user.
      */
     private void projectUi(Project openedProject, int rights) {
@@ -171,6 +256,7 @@ public class TUI {
 
     /**
      * Lets the user edit a project: view tasks and create more.
+     *
      * @param task the task to be edited or null if a new task should be created.
      * @return true if task was edited or created.
      */
