@@ -13,6 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientMain {
+
+    private static String userNow;
+
+    private static void setUserNow(String userNow) {
+        ClientMain.userNow = userNow;
+    }
+    public static String getUser() {
+        return userNow;
+    }
     private static boolean connectToServer(String serverName, CommandLine cmd, Client client) throws IOException, InterruptedException {
 
         // open connection
@@ -26,6 +35,7 @@ public class ClientMain {
         client.connect(ip, port);
 
         String user = cmd.getOptionValue("user");
+        setUserNow(user);
         String pass = cmd.getOptionValue("pass");
 
         if (user != null && pass != null) {
@@ -85,13 +95,13 @@ public class ClientMain {
         } else if (!cmd.hasOption("c") || serverName == null/* || !serverList.contains(serverName)*/) {
             System.out.println("Please establish connection with specific server (enter -c with server name)");
             System.exit(1);
-        } else if (connectToServer(serverName, cmd, client) && cmd.hasOption("s") && !(cmd.getOptionValue("s") == null)) {
+        } /*else if (connectToServer(serverName, cmd, client) && cmd.hasOption("s") && !(cmd.getOptionValue("s") == null)) {
             String projectName = cmd.getOptionValue("s");
             int userId = cmd.getOptionValue("user").;
             if (Client.getProjectList().contains(projectName)) { //seperate non-static class + new method in Client?
                 client.startProjectTUI(args);
             }
-        }
+        }*/
         else if (connectToServer(serverName, cmd, client)) {
             client.startTUI(args);
         }

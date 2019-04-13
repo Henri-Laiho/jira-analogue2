@@ -1,5 +1,7 @@
 package apacheUI;
 
+import client.ClientMain;
+import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.gui2.*;
 
 import java.util.List;
@@ -11,6 +13,7 @@ class ProjectSelector extends BasicWindow {
 
     private ProjectSelectedListener listener;
     private ActionListBox actionListBox;
+    private TextBox textBox;
 
     ProjectSelector(ProjectSelectedListener listener) {
         setCloseWindowWithEscape(true);
@@ -19,12 +22,20 @@ class ProjectSelector extends BasicWindow {
         Panel panel = new Panel();
         panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
+       /* Panel sidePanel = new Panel();
+        sidePanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+        sidePanel.setPosition(new TerminalPosition(5, 5));
+        textBox = new TextBox();
+        textBox.setText("User: " + ClientMain.getUser());
+        sidePanel.addComponent(textBox);
+*/
+       //code for another panel above
         actionListBox = new ActionListBox();
-
-        panel.addComponent(new Label("You are a collaborator in these projects.\nSelect a project to open:"));
+        panel.addComponent(new Label("User: " + ClientMain.getUser() + "\nYou are a collaborator in these projects.\nSelect a project to open:"));
         panel.addComponent(actionListBox);
 
         setComponent(panel);
+
     }
 
     ProjectSelector() {

@@ -104,7 +104,6 @@ public class TUI {
         while (terminalRunning) {
 
             // Keep asking for a project to open
-
             ProjectSelector projectSelector = new ProjectSelector();
             projectSelector.setProjectList(projects);
             projectSelector.setListener(projectIndex -> {
