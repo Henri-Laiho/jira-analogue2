@@ -41,6 +41,7 @@ public class TUI {
     private Client client;
 
     private boolean terminalRunning = false;
+    private boolean editProject = false;
     private Terminal terminal;
     private Screen screen;
     private TextGraphics tg;
@@ -51,6 +52,10 @@ public class TUI {
      */
     public void stopTerminal() {
         terminalRunning = false;
+    }
+
+    public void setEditProject(boolean editProject) {
+        this.editProject = editProject;
     }
 
     /**
@@ -101,14 +106,15 @@ public class TUI {
             // Keep asking for a project to open
 
             ProjectSelector projectSelector = new ProjectSelector();
+            projectSelector.setProjectList(projects);
             projectSelector.setListener(projectIndex -> {
                 // open project projectIndex
 
                 try {
-                    if (client.selectProject(projectIndex)) {
+                    if (client.selectProject(projectIndex) || editProject) {
                         if (client.getUserRightsInProject() > 0) {
 
-                            boolean editProject = true;
+                            editProject = true;
                             while (terminalRunning && editProject) {
                                 Project project = client.getOpenedProject();
                                 List<String> titles = new ArrayList<>();
