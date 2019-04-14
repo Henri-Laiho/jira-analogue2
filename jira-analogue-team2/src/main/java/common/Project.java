@@ -8,6 +8,7 @@ import data.RawUser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Project {
 
@@ -26,6 +27,16 @@ public class Project {
         for (RawTask rawTask : data.tasks) {
             tasklist.add(new Task(rawTask));
         }
+    }
+
+    public RawProject toRawProject() {
+        RawTask[] rawTasks = new RawTask[tasklist.size()];
+        int i = 0;
+        for (Task task : tasklist) {
+            rawTasks[i] = task.toRawTask();
+            i++;
+        }
+        return new RawProject(projectId,  rawTasks, projectName, repositoryUrl);
     }
 
     public void initialize(List<User> users, List<Project> projects) {

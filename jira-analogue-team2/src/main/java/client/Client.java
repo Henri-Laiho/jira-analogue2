@@ -48,7 +48,9 @@ public class Client implements JiraMessageHandler {
     public int getUserRightsInProject() {
         if (user != null)
             return user.getRightsInProject(openedProject);
-        else throw new RuntimeException("getUserRightsInProject when user is null");
+        else
+            return 1;
+            //throw new RuntimeException("getUserRightsInProject when user is null");
     }
 
     public Project getOpenedProject() {
@@ -231,6 +233,7 @@ public class Client implements JiraMessageHandler {
 
     @Override
     public RawError setProject(RawProject message) {
+        System.out.println("Received project data");
         openedProject = new Project(message);
         return null;
     }

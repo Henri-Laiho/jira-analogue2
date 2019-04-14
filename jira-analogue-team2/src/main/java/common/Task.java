@@ -134,7 +134,7 @@ public class Task {
         }
 
         // create the RawTask.
-        return new RawTask(taskId, isCompleted, title, description, priority, createdBy.getUserId(), deadline == null ? null : deadline.getTime(),
+        return new RawTask(taskId, isCompleted, title, description, priority, createdBy == null ? null : createdBy.getUserId(), deadline == null ? null : deadline.getTime(),
                 dateCreated == null ? null : dateCreated.getTime(), masterTask == null ? null : masterTask.taskId, assignedEmployees, boards);
     }
 }

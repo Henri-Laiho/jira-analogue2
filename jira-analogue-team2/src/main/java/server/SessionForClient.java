@@ -20,6 +20,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
     private Connection connection;
     private Session session;
     private Server server;
+    private User user;
 
     public SessionForClient(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -37,6 +38,9 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
                 connection.readMessage();
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+                System.exit(-1);
             }
 
         }
@@ -97,6 +101,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
                                 connection.getOtherIP(), connection.getOtherPort(), connection.getMyIP(), connection.getMyPort());
                         // send session information to client
                         connection.sendMessage(new RawSession(session.getSessionKey()), MessageType.SETSESSION);
+                        this.user = user;
                         // return no error
                         return null;
                     } else
@@ -142,8 +147,22 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
     }
 
     @Override
-    public RawError getProject(Long message) {
-        return new RawError("Not yet implemented :(");
+    public RawError getProject(Long projectId) {
+        if (session != null && session.isValid()) {
+            for (int i = 0; i < user.getProjects().size(); i++) {
+                if (user.getProjects().get(i).getProjectId() == projectId) {
+                    Project project = user.getProjects().get(i);
+                    try {
+                        connection.sendMessage(project.toRawProject(), MessageType.SETPROJECT);
+                        return null;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                        //return new RawError(...)
+                    }
+                }
+            }
+        }
+        return new RawError("The requested project doesn't exist or you are not a collaborator.");
     }
 
     @Override

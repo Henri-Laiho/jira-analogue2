@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 
 class Server implements Runnable {
@@ -171,6 +172,7 @@ class Server implements Runnable {
                     SessionForClient session = new SessionForClient(this, socket);
 
                     executor.submit(session);
+
                     //Thread thread = new Thread(session);
                     //thread.start();
                     System.out.println("New Connection on port " + port + " from " + socket.getInetAddress().getHostName() + ".");

@@ -4,6 +4,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
 
+import java.util.Arrays;
 import java.util.List;
 
 class ProjectEditor extends BasicWindow {
@@ -16,17 +17,20 @@ class ProjectEditor extends BasicWindow {
     private TaskSelectedListener listener;
     private ActionListBox actionListBox;
     private Table<String> taskData;
+    private Panel panel;
 
     ProjectEditor(TaskSelectedListener listener) {
         setCloseWindowWithEscape(true);
         this.listener = listener;
 
-        Panel panel = new Panel();
+        panel = new Panel();
         panel.setLayoutManager(new GridLayout(2));
 
         actionListBox = new ActionListBox();
-        taskData = new Table<>();
-        taskData.setVisibleColumns(3);
+        taskData = new Table<>("Is Done", "Priority", "Deadline");
+
+        // make not focusable, cursor cannot go into the table
+        taskData.setEnabled(false);
 
         panel.addComponent(new Label("Select a task or add a new task:"));
         panel.addComponent(new EmptySpace());
@@ -45,7 +49,7 @@ class ProjectEditor extends BasicWindow {
         this.listener = listener;
     }
 
-    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed) {
+    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed, int selectedTask) {
         actionListBox.clearItems();
 
         actionListBox.addItem("Create task", () -> {
@@ -53,6 +57,7 @@ class ProjectEditor extends BasicWindow {
                 listener.createTask();
         });
 
+        int extraOptionCount = actionListBox.getItemCount();
         int i = 0;
         for (String task : taskTitles) {
             int finalI = i;
@@ -65,13 +70,23 @@ class ProjectEditor extends BasicWindow {
 
         TableModel<String> tableModel = new TableModel<>();
 
-        tableModel.addColumn("Is Done", (String[]) completed.toArray());
-        tableModel.addColumn("Priority", (String[]) priorities.toArray());
-        tableModel.addColumn("Deadline", (String[]) deadlines.toArray());
+        tableModel.addColumn("Is Done", null);
+        tableModel.addColumn("Priority", null);
+        tableModel.addColumn("Deadline", null);
+
+        for (int j = 0; j < completed.size() && j < priorities.size() && j < deadlines.size(); j++) {
+            tableModel.addRow(completed.get(j), priorities.get(j), deadlines.get(j));
+        }
 
         taskData.setTableModel(tableModel);
+        taskData.invalidate();
 
+        actionListBox.setSelectedIndex(selectedTask+extraOptionCount);
         actionListBox.takeFocus();
+    }
+
+    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed) {
+        setTaskList(taskTitles, priorities, deadlines, completed, 0);
     }
 
 

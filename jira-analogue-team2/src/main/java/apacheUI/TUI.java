@@ -4,9 +4,9 @@ import client.Client;
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.graphics.TextGraphics;
-import com.googlecode.lanterna.gui2.DefaultWindowManager;
-import com.googlecode.lanterna.gui2.EmptySpace;
-import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /**
@@ -83,12 +84,12 @@ public class TUI {
         bg = screen.newTextGraphics();
 
         screen.startScreen();
-        bg.setBackgroundColor(TextColor.ANSI.BLACK);
+        /*bg.setBackgroundColor(TextColor.ANSI.BLACK);
         tg.putString(6, 4, "welcome to the minjira text user interface");
         tg.putString(6, 5, "select project name (up and down arrow, hit enter to select):");
         tg.putString(6, 25, "hit ESC to exit");
         TUIBorders tuiBorders = new TUIBorders(screen, bg);
-        tuiBorders.runBorder();
+        tuiBorders.runBorder();*/
         screen.refresh();
         terminalRunning = true;
         int i = 0;
@@ -101,78 +102,93 @@ public class TUI {
             // Keep asking for a project to open
 
             ProjectSelector projectSelector = new ProjectSelector();
-            projectSelector.setListener(projectIndex -> {
-                // open project projectIndex
+            projectSelector.setListener(new ProjectSelector.ProjectSelectedListener() {
+                boolean editProject = true;
+                int selectedIndex = -1;
 
-                try {
-                    if (client.selectProject(projectIndex)) {
-                        if (client.getUserRightsInProject() > 0) {
+                @Override
+                public void projectSelected(int projectIndex) {
+                    // open project projectIndex
 
-                            boolean editProject = true;
-                            while (terminalRunning && editProject) {
-                                Project project = client.getOpenedProject();
-                                List<String> titles = new ArrayList<>();
-                                List<String> completed = new ArrayList<>();
-                                List<String> priorities = new ArrayList<>();
-                                List<String> deadlines = new ArrayList<>();
-                                project.getTasklist().forEach(task -> {
-                                    titles.add(task.getTitle());
-                                    completed.add(task.isCompleted() ? "Done" : "Not Done");
-                                    priorities.add(String.valueOf(task.getPriority()));
-                                    deadlines.add(task.getDeadline().toString());
-                                });
+                    try {
+                        if (client.selectProject(projectIndex)) {
+                            if (client.getUserRightsInProject() > 0) {
 
-                                ProjectEditor projectEditor = new ProjectEditor();
-                                projectEditor.setListener(new ProjectEditor.TaskSelectedListener() {
-                                    @Override
-                                    public void taskSelected(int taskIndex) {
-                                        Task task = project.getTasklist().get(taskIndex);
+                                while (terminalRunning && editProject) {
+                                    Project project = client.getOpenedProject();
+                                    List<String> titles = new ArrayList<>();
+                                    List<String> completed = new ArrayList<>();
+                                    List<String> priorities = new ArrayList<>();
+                                    List<String> deadlines = new ArrayList<>();
+                                    project.getTasklist().forEach(task -> {
+                                        titles.add(task.getTitle());
+                                        completed.add(task.isCompleted() ? "Done" : "Not Done");
+                                        priorities.add(String.valueOf(task.getPriority()));
+                                        deadlines.add(task.getDeadline().toString());
+                                    });
 
-                                        projectEditor.close();
-                                        TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
-                                            try {
-                                                client.sendUpdateTask(task);
-                                            } catch (IOException | InterruptedException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        });
+                                    ProjectEditor projectEditor = new ProjectEditor();
+                                    projectEditor.setListener(new ProjectEditor.TaskSelectedListener() {
+                                        @Override
+                                        public void taskSelected(int taskIndex) {
+                                            selectedIndex = taskIndex;
+                                            Task task = project.getTasklist().get(taskIndex);
 
-                                        projectEditor.close();
-                                        gui.addWindowAndWait(taskEditor);
-                                    }
+                                            projectEditor.close();
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                                try {
+                                                    client.sendUpdateTask(task);
+                                                } catch (IOException | InterruptedException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            });
 
-                                    @Override
-                                    public void createTask() {
-                                        Task task = new Task(new RawTask(project.getNewValidTaskId(), false, "Enter Title",
-                                                "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
-                                                null, null, null));
+                                            projectEditor.close();
+                                            gui.addWindowAndWait(taskEditor);
+                                        }
 
-                                        TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
-                                            try {
-                                                client.sendCreateTask(task);
-                                            } catch (IOException | InterruptedException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        });
+                                        @Override
+                                        public void createTask() {
+                                            Task task = new Task(new RawTask(project.getNewValidTaskId(), false, "Enter Title",
+                                                    "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
+                                                    null, null, null));
 
-                                        projectEditor.close();
-                                        gui.addWindowAndWait(taskEditor);
-                                    }
-                                });
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                                try {
+                                                    client.sendCreateTask(task);
+                                                } catch (IOException | InterruptedException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            });
 
-                                projectEditor.setTaskList(titles, priorities, deadlines, completed);
-                                projectSelector.close();
-                                gui.addWindowAndWait(projectEditor);
-                            }
+                                            projectEditor.close();
+                                            gui.addWindowAndWait(taskEditor);
+                                        }
+                                    });
 
-                            // projectUi(client.getOpenedProject(), client.getUserRightsInProject());
-                        } else System.out.println("You dont have rights to view this project.");
-                    } else System.out.println("Failed to open project.");
-                } catch (IOException | InterruptedException e) {
-                    throw new RuntimeException(e);
+                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+
+                                    // stop reopening the project editor window when escape is pressed - set ui loop condition to false.
+                                    projectEditor.addWindowListener(new WindowListenerAdapter() {
+                                        @Override
+                                        public void onUnhandledInput(Window basePane, KeyStroke keyStroke, AtomicBoolean hasBeenHandled) {
+                                            if (keyStroke.getKeyType() == KeyType.Escape)
+                                                editProject = false;
+                                        }
+                                    });
+                                    projectSelector.close();
+                                    gui.addWindowAndWait(projectEditor);
+                                }
+
+                                // projectUi(client.getOpenedProject(), client.getUserRightsInProject());
+                            } else System.out.println("You dont have rights to view this project.");
+                        } else System.out.println("Failed to open project.");
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+
                 }
-
-
             });
             projectSelector.setProjectList(projects);
 
