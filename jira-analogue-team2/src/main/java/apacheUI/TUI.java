@@ -42,6 +42,7 @@ public class TUI {
     private Client client;
 
     private boolean terminalRunning = false;
+    private boolean editProject = false;
     private Terminal terminal;
     private Screen screen;
     private TextGraphics tg;
@@ -52,6 +53,10 @@ public class TUI {
      */
     public void stopTerminal() {
         terminalRunning = false;
+    }
+
+    public void setEditProject(boolean editProject) {
+        this.editProject = editProject;
     }
 
     /**
@@ -84,12 +89,12 @@ public class TUI {
         bg = screen.newTextGraphics();
 
         screen.startScreen();
-        /*bg.setBackgroundColor(TextColor.ANSI.BLACK);
+        bg.setBackgroundColor(TextColor.ANSI.BLACK);
         tg.putString(6, 4, "welcome to the minjira text user interface");
         tg.putString(6, 5, "select project name (up and down arrow, hit enter to select):");
         tg.putString(6, 25, "hit ESC to exit");
         TUIBorders tuiBorders = new TUIBorders(screen, bg);
-        tuiBorders.runBorder();*/
+        tuiBorders.runBorder();
         screen.refresh();
         terminalRunning = true;
         int i = 0;
@@ -100,7 +105,6 @@ public class TUI {
         while (terminalRunning) {
 
             // Keep asking for a project to open
-
             ProjectSelector projectSelector = new ProjectSelector();
             projectSelector.setListener(new ProjectSelector.ProjectSelectedListener() {
                 boolean editProject = true;
@@ -186,8 +190,6 @@ public class TUI {
                     } catch (IOException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-
-
                 }
             });
             projectSelector.setProjectList(projects);

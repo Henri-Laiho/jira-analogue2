@@ -40,6 +40,13 @@ public class Client implements JiraMessageHandler {
         updateProjects();
         tui.startTerminal(args);
     }
+    void startProjectTUI(String[] args) throws IOException, InterruptedException {
+        updateProjects();
+        tui.setEditProject(true);
+        tui.startTerminal(args);
+
+
+    }
 
     public long getUserId() {
         return user == null ? -1 : user.getUserId();
@@ -202,7 +209,7 @@ public class Client implements JiraMessageHandler {
     @Override
     public RawError setSession(RawSession session) {
         clientSession = new Session(session.sessionKey, -1, -1, connection.getMyIP(), connection.getMyPort(), connection.getOtherIP(), connection.getOtherPort());
-        if (session.sessionKey.length == 16)
+        if (session.sessionKey != null && session.sessionKey.length == 16)
             tui.setDisplayUsername(username);
         else
             tui.setDisplayUsername("");

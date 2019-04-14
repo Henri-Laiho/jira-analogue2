@@ -1,7 +1,11 @@
 package client;
 
+import apacheUI.TUI;
 import common.Connection;
+import common.Project;
+import messages.Session;
 import org.apache.commons.cli.*;
+import server.SessionForClient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,6 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClientMain {
+
+    private static String userNow;
+
+    private static void setUserNow(String userNow) {
+        ClientMain.userNow = userNow;
+    }
+    public static String getUser() {
+        return userNow;
+    }
     private static boolean connectToServer(String serverName, CommandLine cmd, Client client) throws IOException, InterruptedException {
 
         // open connection
@@ -22,17 +35,17 @@ public class ClientMain {
         client.connect(ip, port);
 
         String user = cmd.getOptionValue("user");
+        setUserNow(user);
         String pass = cmd.getOptionValue("pass");
 
         if (user != null && pass != null) {
             if (client.login(user, pass)) {
                 System.out.println("User " + user + " logged in.");
                 return true;
-            }
-            else
+
+            } else
                 System.out.println("Login failed.");
-        }
-        else {
+        } else {
             System.out.println("Please log in (enter -user <username> and -pass <password>)");
         }
         return false;
@@ -40,6 +53,7 @@ public class ClientMain {
 
         // project selection on TUI main screen
         /*String searchTerm = cmd.getOptionValue("s");
+
         if (searchTerm == null || searchTerm.isEmpty()) {
             System.out.println("Search term may not be empty");
         } else {
@@ -59,7 +73,7 @@ public class ClientMain {
         options.addOption("c", "connect", true, "Send connect request to server(with name and port separated by ':').")
                 .addOption("h", "help", false, "print this message")
                 .addOption("v", "version", false, "print the version information and exit")
-                .addOption("s", "search", true, "search for project name")
+                .addOption("s", "search", true, "search for project name(override)")
                 .addOption("user", "username", true, "command to log in with this username or email")
                 .addOption("pass", "password", true, "command to log in with this password");
         CommandLineParser parser = new DefaultParser();
@@ -75,14 +89,20 @@ public class ClientMain {
 
         if (cmd.hasOption("h")) {
             HelpFormatter formatter = new HelpFormatter();
-
             final PrintWriter writer = new PrintWriter(System.out);
             formatter.printUsage(writer, 80, "Jira Analogue", options);
             writer.flush();
         } else if (!cmd.hasOption("c") || serverName == null/* || !serverList.contains(serverName)*/) {
             System.out.println("Please establish connection with specific server (enter -c with server name)");
             System.exit(1);
-        } else if (connectToServer(serverName, cmd, client)) {
+        } /*else if (connectToServer(serverName, cmd, client) && cmd.hasOption("s") && !(cmd.getOptionValue("s") == null)) {
+            String projectName = cmd.getOptionValue("s");
+            int userId = cmd.getOptionValue("user").;
+            if (Client.getProjectList().contains(projectName)) { //seperate non-static class + new method in Client?
+                client.startProjectTUI(args);
+            }
+        }*/
+        else if (connectToServer(serverName, cmd, client)) {
             client.startTUI(args);
         }
 
