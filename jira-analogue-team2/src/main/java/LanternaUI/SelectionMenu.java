@@ -1,4 +1,4 @@
-package apacheUI;
+package LanternaUI;
 
 import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.graphics.TextGraphics;
@@ -6,7 +6,6 @@ import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.Terminal;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

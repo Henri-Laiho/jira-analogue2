@@ -1,4 +1,4 @@
-package apacheUI;
+package LanternaUI;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TextColor;

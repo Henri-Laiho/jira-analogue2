@@ -1,6 +1,6 @@
 package client;
 
-import apacheUI.TUI;
+import LanternaUI.TUI;
 import common.Connection;
 import common.Project;
 import common.Task;

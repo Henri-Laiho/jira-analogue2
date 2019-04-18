@@ -1,4 +1,4 @@
-package apacheUI;
+package LanternaUI;
 
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.input.KeyStroke;

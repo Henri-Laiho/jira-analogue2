@@ -1,10 +1,9 @@
-package apacheUI;
+package LanternaUI;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
 
-import java.util.Arrays;
 import java.util.List;
 
 class ProjectEditor extends BasicWindow {

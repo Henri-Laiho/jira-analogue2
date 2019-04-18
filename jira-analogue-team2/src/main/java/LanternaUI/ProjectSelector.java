@@ -1,7 +1,6 @@
-package apacheUI;
+package LanternaUI;
 
 import client.ClientMain;
-import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.gui2.*;
 
 import java.util.List;

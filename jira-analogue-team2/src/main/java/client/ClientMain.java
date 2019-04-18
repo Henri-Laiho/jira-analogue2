@@ -1,11 +1,7 @@
 package client;
 
-import apacheUI.TUI;
 import common.Connection;
-import common.Project;
-import messages.Session;
 import org.apache.commons.cli.*;
-import server.SessionForClient;
 
 import java.io.IOException;
 import java.io.PrintWriter;
