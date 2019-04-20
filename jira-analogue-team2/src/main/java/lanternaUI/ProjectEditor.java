@@ -1,4 +1,4 @@
-package LanternaUI;
+package lanternaUI;
 
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;

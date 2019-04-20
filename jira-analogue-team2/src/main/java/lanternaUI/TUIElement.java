@@ -1,4 +1,4 @@
-package LanternaUI;
+package lanternaUI;
 
 import com.googlecode.lanterna.TerminalPosition;
 import com.googlecode.lanterna.TextColor;

@@ -1,6 +1,6 @@
 package client;
 
-import LanternaUI.TUI;
+import lanternaUI.TUI;
 import common.Connection;
 import common.Project;
 import common.Task;

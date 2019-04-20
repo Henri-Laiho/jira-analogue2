@@ -1,4 +1,4 @@
-package LanternaUI;
+package lanternaUI;
 
 import client.Client;
 import com.googlecode.lanterna.TextColor;

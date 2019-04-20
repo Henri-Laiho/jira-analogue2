@@ -1,4 +1,4 @@
-package LanternaUI;
+package lanternaUI;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;

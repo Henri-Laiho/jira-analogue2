@@ -1,4 +1,4 @@
-package LanternaUI;
+package lanternaUI;
 
 import client.ClientMain;
 import com.googlecode.lanterna.gui2.*;
