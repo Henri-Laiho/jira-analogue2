@@ -9,6 +9,7 @@ import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import com.googlecode.lanterna.terminal.Terminal;
 import common.Project;
 import common.Task;
@@ -81,6 +82,13 @@ public class TUI {
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
 
         terminal = dtf.createTerminal();
+
+        // Automatically close terminal when exit button is pressed. This makes special exit/EOF handling
+        if (terminal instanceof SwingTerminalFrame){
+            SwingTerminalFrame stf = (SwingTerminalFrame) terminal;
+            stf.setDefaultCloseOperation(stf.EXIT_ON_CLOSE);
+        };
+
         screen = new TerminalScreen(terminal);
         tg = screen.newTextGraphics();
         bg = screen.newTextGraphics();
