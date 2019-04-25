@@ -57,6 +57,7 @@ public class Client implements JiraMessageHandler {
             return user.getRightsInProject(openedProject);
         else
             return 1;
+            //TODO: remove comments and make the user rights system work:
             //throw new RuntimeException("getUserRightsInProject when user is null");
     }
 
@@ -67,7 +68,7 @@ public class Client implements JiraMessageHandler {
     public boolean sendUpdateTask(Task task) throws IOException, InterruptedException {
         if (reconnect()) {
             connection.sendMessage(task.toRawTask(), MessageType.UPDATETASK);
-            return true;
+            return connection.readMessage() == MessageType.RESPONSE;
         }
         return false;
     }
@@ -75,7 +76,7 @@ public class Client implements JiraMessageHandler {
     public boolean sendCreateTask(Task task) throws IOException, InterruptedException {
         if (reconnect()) {
             connection.sendMessage(task.toRawTask(), MessageType.CREATETASK);
-            return true;
+            return connection.readMessage() == MessageType.RESPONSE;
         }
         return false;
     }

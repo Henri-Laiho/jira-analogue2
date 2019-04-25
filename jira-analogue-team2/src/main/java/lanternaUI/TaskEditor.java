@@ -1,5 +1,6 @@
 package lanternaUI;
 
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
@@ -17,7 +18,6 @@ import static common.Constants.DATETIME_FORMAT;
 
 public class TaskEditor extends BasicWindow {
     interface TaskEditedListener {
-        //void partSelected(int taskIndex);
         void taskEdited(Task task);
     }
 
@@ -28,8 +28,7 @@ public class TaskEditor extends BasicWindow {
     private static final String[] fieldNames = {"Title", "Description", "Is Done", "Priority", "Deadline"};
 
     private Panel panel;
-    private TaskEditedListener listener = null;
-    private ActionListBox actionListBox;
+    private TaskEditedListener listener;
     private List<Task> tasks;
     private Table<String> taskTable;
     private Label editingFieldNameLabel;
@@ -41,24 +40,24 @@ public class TaskEditor extends BasicWindow {
     private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
         editingFieldNameLabel.setText(fieldNames[fieldIndex]);
         fieldEditor.setText(initial);
+        fieldEditor.setPreferredSize(new TerminalSize(20, multiline ? 10 : 1));
 
         fieldEditor.setInputFilter((interactable, keyStroke) -> {
             if (filter == null || filter.onInput(interactable, keyStroke)) {
-                if (keyStroke.getKeyType() == KeyType.ArrowUp
-                        || keyStroke.getKeyType() == KeyType.ArrowDown
+                if ((!multiline || fieldEditor.getCaretPosition().getRow() == 0)
+                        && keyStroke.getKeyType() == KeyType.ArrowUp
+                        || (!multiline || fieldEditor.getCaretPosition().getRow() == fieldEditor.getLineCount() - 1)
+                        && keyStroke.getKeyType() == KeyType.ArrowDown
                         || keyStroke.getKeyType() == KeyType.Tab)
                     return false;
                 if (keyStroke.getKeyType() == KeyType.Escape) {
-                    taskTable.takeFocus();
-                    fieldEditor.setEnabled(false);
-                    fieldEditor.setText("");
+                    resetTextField();
                     return false;
                 }
-                if ((multiline || keyStroke.isCtrlDown()) && keyStroke.getKeyType() == KeyType.Enter) {
-                    listener.textFieldEdited(fieldEditor.getText());
-                    taskTable.takeFocus();
-                    fieldEditor.setEnabled(false);
-                    fieldEditor.setText("");
+                if ((!multiline || keyStroke.isCtrlDown()) && keyStroke.getKeyType() == KeyType.Enter) {
+                    if (listener != null)
+                        listener.textFieldEdited(fieldEditor.getText());
+                    resetTextField();
                     return false;
                 }
                 return true;
@@ -71,12 +70,25 @@ public class TaskEditor extends BasicWindow {
 
     }
 
+    private void resetTextField() {
+        taskTable.takeFocus();
+        fieldEditor.setEnabled(false);
+        fieldEditor.setText("");
+        editingFieldNameLabel.setText("");
+        fieldEditor.setPreferredSize(new TerminalSize(0, 0));
+    }
+
     private void refreshScreen() {
         TableModel<String> taskDataInfo = new TableModel<>();
         for (String fieldName : fieldNames) {
             taskDataInfo.addColumn(fieldName, null);
         }
-        taskDataInfo.addRow(task.getTitle(), task.getDescription(), task.isCompleted() ? "X" : " ", String.valueOf(task.getPriority()), new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+        taskDataInfo.addRow(
+                task.getTitle(),
+                task.getDescription(),
+                task.isCompleted() ? "X" : " ",
+                String.valueOf(task.getPriority()),
+                task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
         taskTable.setTableModel(taskDataInfo);
     }
 
@@ -94,7 +106,6 @@ public class TaskEditor extends BasicWindow {
         taskTable = new Table<>(fieldNames);
         refreshScreen();
 
-
         //selects which part to edit (editing not implemented)
         /*for (int i = 0; i < taskDataInfo.getColumnCount(); i++) {
             int selectedI = i;
@@ -104,7 +115,6 @@ public class TaskEditor extends BasicWindow {
                 }
             });
         }*/
-
 
         taskTable.setCellSelection(true);
         taskTable.setSelectAction(() -> {
@@ -136,20 +146,17 @@ public class TaskEditor extends BasicWindow {
                             });
                     break;
                 case 4:
-                    editText(taskTable.getSelectedColumn(), new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()), false,
+                    editText(taskTable.getSelectedColumn(), task.getDeadline() == null ? DATETIME_FORMAT : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()), false,
                             (interactable, keyStroke) ->
                                     keyStroke.getKeyType() != KeyType.Character
-                                            || keyStroke.getCharacter().toString().matches("[\\d.:]"), new TextFieldEditedListener() {
-                                @Override
-                                public void textFieldEdited(String newValue) {
-                                    try {
-                                        Date newdate = new SimpleDateFormat(DATETIME_FORMAT).parse(newValue);
-                                        TaskEditor.this.task.setDeadline(newdate);
-                                        refreshScreen();
-                                    } catch (ParseException e) {
-                                        System.out.println("Cannot parse date: " + newValue);
-                                        throw new RuntimeException("Cannot parse date: " + newValue);
-                                    }
+                                            || keyStroke.getCharacter().toString().matches("[\\d.:]"), newValue -> {
+                                try {
+                                    Date newdate = new SimpleDateFormat(DATETIME_FORMAT).parse(newValue);
+                                    TaskEditor.this.task.setDeadline(newdate);
+                                    refreshScreen();
+                                } catch (ParseException e) {
+                                    System.out.println("Cannot parse date: " + newValue);
+                                    throw new RuntimeException("Cannot parse date: " + newValue);
                                 }
                             });
                     break;
@@ -160,11 +167,25 @@ public class TaskEditor extends BasicWindow {
         panel.addComponent(new EmptySpace());
 
         editingFieldNameLabel = new Label("");
-        fieldEditor = new TextBox();
+        fieldEditor = new TextBox(new TerminalSize(0, 0), TextBox.Style.MULTI_LINE);
         fieldEditor.setEnabled(false);
         panel.addComponent(editingFieldNameLabel);
         panel.addComponent(new EmptySpace());
         panel.addComponent(fieldEditor);
+
+        cancelBtn = new Button("Cancel");
+        cancelBtn.addListener(button -> TaskEditor.this.close());
+
+        saveBtn = new Button("Save");
+        saveBtn.addListener(button -> {
+            if (TaskEditor.this.listener != null)
+                TaskEditor.this.listener.taskEdited(TaskEditor.this.task);
+            TaskEditor.this.close();
+        });
+
+        panel.addComponent(new EmptySpace());
+        panel.addComponent(saveBtn);
+        panel.addComponent(cancelBtn);
 
         setComponent(panel);
 
