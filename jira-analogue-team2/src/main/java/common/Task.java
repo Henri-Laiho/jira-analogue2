@@ -96,6 +96,16 @@ public class Task {
         return employees;
     }
 
+
+    public void setTitle(String title) { this.title = title; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public void setPriority(int priority) { this.priority = priority; }
+
+    public void setDeadline(Date deadline) { this.deadline = deadline; }
+
+
     private RawTask rawTask;
 
     private long taskId;

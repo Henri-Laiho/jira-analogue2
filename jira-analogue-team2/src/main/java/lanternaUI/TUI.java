@@ -145,7 +145,7 @@ public class TUI {
                                             Task task = project.getTasklist().get(taskIndex);
 
                                             projectEditor.close();
-                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist() ,gui, task1 -> {
                                                 try {
                                                     client.sendUpdateTask(task);
                                                 } catch (IOException | InterruptedException e) {
@@ -163,7 +163,7 @@ public class TUI {
                                                     "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
                                                     null, null, null));
 
-                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
                                                 try {
                                                     client.sendCreateTask(task);
                                                 } catch (IOException | InterruptedException e) {
