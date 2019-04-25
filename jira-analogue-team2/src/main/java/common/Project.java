@@ -13,8 +13,9 @@ import java.util.function.Consumer;
 public class Project {
 
     private static final long MAX_TASKS = Short.MAX_VALUE;
+
     private long projectId = -1;
-    private List<Task> tasklist = new ArrayList<>();
+    private List<Task> tasklist = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
     private String projectName = null;
     private String repositoryUrl = null;
     private long lastTaskID = -1;

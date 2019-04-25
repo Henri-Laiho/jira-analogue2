@@ -10,6 +10,19 @@ import java.util.function.IntFunction;
 
 public class Task {
 
+    private RawTask rawTask;
+    private long taskId;
+    private boolean isCompleted;
+    private String title;
+    private String description;
+    private int priority;
+    private User createdBy;  // KNOW WHEN TO UPDATE THIS
+    private Date deadline;
+    private Date dateCreated;
+    private Task masterTask;  // KNOW WHEN TO UPDATE THIS
+    private List<User> employees = new ArrayList<>();   // KNOW WHEN TO UPDATE THIS
+    private List<Project> projects = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
+
     public Task(RawTask rawTask) {
         this.rawTask = rawTask;
         this.taskId = rawTask.taskId;
@@ -119,20 +132,6 @@ public class Task {
     public List<User> getEmployees() {
         return employees;
     }
-
-    private RawTask rawTask;
-
-    private long taskId;
-    private boolean isCompleted;
-    private String title;
-    private String description;
-    private int priority;
-    private User createdBy;
-    private Date deadline;
-    private Date dateCreated;
-    private Task masterTask;
-    private List<User> employees = new ArrayList<>();
-    private List<Project> projects = new ArrayList<>();
 
     public RawTask toRawTask() {
         // put user ids to an array
