@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.function.IntFunction;
 
 public class Task {
 
@@ -110,13 +109,21 @@ public class Task {
     }
 
 
-    public void setTitle(String title) { this.title = title; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public void setPriority(int priority) { this.priority = priority; }
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
 
-    public void setDeadline(Date deadline) { this.deadline = deadline; }
+    public void setDeadline(Date deadline) {
+        this.deadline = deadline;
+    }
 
 
     public RawTask toRawTask() {

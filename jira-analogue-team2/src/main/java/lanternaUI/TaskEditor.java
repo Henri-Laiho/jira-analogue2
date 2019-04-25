@@ -5,7 +5,6 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
 import common.Task;
 
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -39,32 +38,31 @@ public class TaskEditor extends BasicWindow {
         TextBox description = add_property_to_tui("Description", task.getDescription(), 70, 8, null);
 
         Button saveChanges = new Button("Save changes", () -> {
-                System.out.println("Not saving changes.");
-                String errors = "";
-                int priorityVal = 0;
-                //Date deadlineVal = task.getDeadline();
+            System.out.println("Not saving changes.");
+            String errors = "";
+            int priorityVal = 0;
+            //Date deadlineVal = task.getDeadline();
 
-                try{
-                    priorityVal = Integer.valueOf(priority.getText());
-                } catch(NumberFormatException e){
-                    errors += "Invalid priority. Must be \"[0-9]\".\n";
-                }
+            try {
+                priorityVal = Integer.valueOf(priority.getText());
+            } catch (NumberFormatException e) {
+                errors += "Invalid priority. Must be \"[0-9]\".\n";
+            }
                 /*try{
                     deadlineVal = new Date(Long.valueOf(deadline.getText()));
                 } catch(IllegalArgumentException e){
                     errors += "Invalid date, must be \"yyyy-[m]m-[d]d\".\n";
                 }*/
-                if (errors.equals("")){
-                    task.setTitle(title.getText());
-                    task.setPriority(priorityVal);
-                    //task.setDeadline(deadlineVal);
-                    task.setDescription(description.getText());
-                    this.close();
-                }
-                else{
-                    MessageDialog.showMessageDialog(gui, "Task can't be saved because of following errors", errors);
-                }
+            if (errors.equals("")) {
+                task.setTitle(title.getText());
+                task.setPriority(priorityVal);
+                //task.setDeadline(deadlineVal);
+                task.setDescription(description.getText());
+                this.close();
+            } else {
+                MessageDialog.showMessageDialog(gui, "Task can't be saved because of following errors", errors);
             }
+        }
         );
         panel.addComponent(saveChanges);
         setComponent(panel);

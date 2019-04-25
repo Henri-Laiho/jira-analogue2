@@ -1,13 +1,9 @@
 package server;
 
-import common.Project;
-import common.User;
 import data.RawProject;
-import data.RawTask;
 import data.RawUser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class RawServerData {

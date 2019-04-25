@@ -3,7 +3,6 @@ package lanternaUI;
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.graphics.TextGraphics;
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
@@ -96,7 +95,7 @@ public class TextEditor extends KeyBoardTUIElement {
         final WindowBasedTextGUI textGUI = new MultiWindowTextGUI(screen);
         final Window window = new BasicWindow("My Root Window");
         Panel contentPanel = new Panel(new GridLayout(2));
-        GridLayout gridLayout = (GridLayout)contentPanel.getLayoutManager();
+        GridLayout gridLayout = (GridLayout) contentPanel.getLayoutManager();
         gridLayout.setHorizontalSpacing(3);
         Label title = new Label("This is a label that spans two columns");
         title.setLayoutData(GridLayout.createLayoutData(

@@ -9,8 +9,8 @@ import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import common.Project;
 import common.Task;
 import data.RawTask;
@@ -85,10 +85,11 @@ public class TUI {
 
         // Automatically close terminal when exit button is pressed. This makes special exit/EOF handling
         // unnecessary. Swing uses System.exit to close the JVM.
-        if (terminal instanceof SwingTerminalFrame){
+        if (terminal instanceof SwingTerminalFrame) {
             SwingTerminalFrame stf = (SwingTerminalFrame) terminal;
             stf.setDefaultCloseOperation(stf.EXIT_ON_CLOSE);
-        };
+        }
+        ;
 
         screen = new TerminalScreen(terminal);
         tg = screen.newTextGraphics();
@@ -145,7 +146,7 @@ public class TUI {
                                             Task task = project.getTasklist().get(taskIndex);
 
                                             projectEditor.close();
-                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist() ,gui, task1 -> {
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
                                                 try {
                                                     client.sendUpdateTask(task);
                                                 } catch (IOException | InterruptedException e) {

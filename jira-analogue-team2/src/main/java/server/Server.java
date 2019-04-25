@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import common.Connection;
 import common.Project;
-import common.Task;
 import common.User;
 import data.RawProject;
 import data.RawTask;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
@@ -80,7 +78,7 @@ class Server implements Runnable {
             RawServerData rawData = gson.fromJson(json, RawServerData.class);
 
 
-            if (rawData.userSalts.size() != rawData.rawUsers.size()){
+            if (rawData.userSalts.size() != rawData.rawUsers.size()) {
                 throw new JsonSyntaxException("Corrupt file (rawData.userSalts.size() != rawData.rawUsers.size()).");
             }
 
@@ -92,25 +90,26 @@ class Server implements Runnable {
                 userSalts.put(users.get(i), rawData.userSalts.get(i));
             }
 
-        } catch (IOException e){
+        } catch (IOException e) {
             System.out.println("ERROR: Can't open server data file");
             e.printStackTrace();
             System.out.println("Loading built in test data.");
             loadTestData();
-        } catch (JsonSyntaxException e){
+        } catch (JsonSyntaxException e) {
             System.out.println("ERROR: Server data file is corrupt.");
             e.printStackTrace();
             System.out.println("Loading built in test data.");
             loadTestData();
         }
         initialize();
-        if(!Files.exists(Path.of(DATA_FILE_PATH))){
+        if (!Files.exists(Path.of(DATA_FILE_PATH))) {
             System.out.println("Saving new data file.");
             saveData();
         }
 
     }
-    void loadTestData(){
+
+    void loadTestData() {
         RawTask[] tasks1 = {
                 new RawTask(1, false, "A Task", "do something again", 1, 200L,
                         1576800000000L, 1545264000000L, -1L, null, null),
@@ -134,8 +133,8 @@ class Server implements Runnable {
     }
 
     void saveData() {
-        var rawProjects = projects.stream().map(p-> p.toRawProject()).collect(Collectors.toList());
-        var rawUsers = users.stream().map(u-> u.toRawUser(projects)).collect(Collectors.toList());
+        var rawProjects = projects.stream().map(p -> p.toRawProject()).collect(Collectors.toList());
+        var rawUsers = users.stream().map(u -> u.toRawUser(projects)).collect(Collectors.toList());
         var saltsData = users.stream().map(u -> userSalts.get(u)).collect(Collectors.toList());
 
         var rawData = new RawServerData();
@@ -173,7 +172,7 @@ class Server implements Runnable {
      */
     long getNewValidSessID() {
         long newID = lastSessionID;
-        while(true) {
+        while (true) {
             newID++;
             boolean valid = true;
             for (SessionForClient session : sessions) {
@@ -186,7 +185,7 @@ class Server implements Runnable {
 
             if (newID == MAX_SESSIONS)
                 newID = 0;
-            if (newID == lastSessionID-1)
+            if (newID == lastSessionID - 1)
                 return -1;
         }
         lastSessionID = newID;
@@ -198,7 +197,7 @@ class Server implements Runnable {
      */
     long getNewValidUserID() {
         long newID = 0;
-        while(true) {
+        while (true) {
             boolean valid = true;
             for (User user : users) {
                 if (user.getUserId() == newID) {
