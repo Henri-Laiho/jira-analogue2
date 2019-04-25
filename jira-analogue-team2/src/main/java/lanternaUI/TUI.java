@@ -84,6 +84,7 @@ public class TUI {
         terminal = dtf.createTerminal();
 
         // Automatically close terminal when exit button is pressed. This makes special exit/EOF handling
+        // unnecessary. Swing uses System.exit to close the JVM.
         if (terminal instanceof SwingTerminalFrame){
             SwingTerminalFrame stf = (SwingTerminalFrame) terminal;
             stf.setDefaultCloseOperation(stf.EXIT_ON_CLOSE);
