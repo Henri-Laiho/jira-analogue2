@@ -1,9 +1,6 @@
 package server;
 
 import auth.SecurityHelper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import common.Connection;
 import common.Project;
 import common.User;
@@ -14,22 +11,19 @@ import data.RawUser;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
 
 class Server implements Runnable {
 
     private static final long MAX_SESSIONS = 1024;
     private static final long MAX_USERS = 65536;
-    private static final String DATA_FILE_PATH = "SERVER_DATA.json";
 
     private final int port;
     private List<Project> projects = new ArrayList<>();
@@ -72,44 +66,9 @@ class Server implements Runnable {
     }
 
     void loadData() {
-        Gson gson = new Gson();
-        try {
-            String json = Files.readString(Path.of(DATA_FILE_PATH));
-            RawServerData rawData = gson.fromJson(json, RawServerData.class);
+        // TODO: load data from files
 
-
-            if (rawData.userSalts.size() != rawData.rawUsers.size()) {
-                throw new JsonSyntaxException("Corrupt file (rawData.userSalts.size() != rawData.rawUsers.size()).");
-            }
-
-            // Convert types
-            projects = rawData.rawProjects.stream().map(rp -> new Project(rp)).collect(Collectors.toList());
-            users = rawData.rawUsers.stream().map(ru -> new User(ru)).collect(Collectors.toList());
-
-            for (int i = 0; i < users.size(); i++) {
-                userSalts.put(users.get(i), rawData.userSalts.get(i));
-            }
-
-        } catch (IOException e) {
-            System.out.println("ERROR: Can't open server data file");
-            e.printStackTrace();
-            System.out.println("Loading built in test data.");
-            loadTestData();
-        } catch (JsonSyntaxException e) {
-            System.out.println("ERROR: Server data file is corrupt.");
-            e.printStackTrace();
-            System.out.println("Loading built in test data.");
-            loadTestData();
-        }
-        initialize();
-        if (!Files.exists(Path.of(DATA_FILE_PATH))) {
-            System.out.println("Saving new data file.");
-            saveData();
-        }
-
-    }
-
-    void loadTestData() {
+        // test data:
         RawTask[] tasks1 = {
                 new RawTask(1, false, "A Task", "do something again", 1, 200L,
                         1576800000000L, 1545264000000L, -1L, null, null),
@@ -130,32 +89,8 @@ class Server implements Runnable {
 
         users.get(0).addProject(projects.get(0));
         users.get(0).addProject(projects.get(1));
-    }
 
-    void saveData() {
-        var rawProjects = projects.stream().map(p -> p.toRawProject()).collect(Collectors.toList());
-        var rawUsers = users.stream().map(u -> u.toRawUser(projects)).collect(Collectors.toList());
-        var saltsData = users.stream().map(u -> userSalts.get(u)).collect(Collectors.toList());
-
-        var rawData = new RawServerData();
-
-        rawData.rawProjects = rawProjects;
-        rawData.rawUsers = rawUsers;
-        rawData.userSalts = saltsData;
-
-
-        var gson = new GsonBuilder().setPrettyPrinting().create(); // For easyer debugging.
-        String text = gson.toJson(rawData);
-
-        try {
-            Files.writeString(Path.of(DATA_FILE_PATH), text);
-        } catch (IOException e) {
-            System.out.println("Can't save data file.");
-            e.printStackTrace();
-            System.out.println("Ignoring previous error.");
-        }
-
-
+        initialize();
     }
 
     void initialize() {
@@ -172,7 +107,7 @@ class Server implements Runnable {
      */
     long getNewValidSessID() {
         long newID = lastSessionID;
-        while (true) {
+        while(true) {
             newID++;
             boolean valid = true;
             for (SessionForClient session : sessions) {
@@ -185,7 +120,7 @@ class Server implements Runnable {
 
             if (newID == MAX_SESSIONS)
                 newID = 0;
-            if (newID == lastSessionID - 1)
+            if (newID == lastSessionID-1)
                 return -1;
         }
         lastSessionID = newID;
@@ -197,7 +132,7 @@ class Server implements Runnable {
      */
     long getNewValidUserID() {
         long newID = 0;
-        while (true) {
+        while(true) {
             boolean valid = true;
             for (User user : users) {
                 if (user.getUserId() == newID) {

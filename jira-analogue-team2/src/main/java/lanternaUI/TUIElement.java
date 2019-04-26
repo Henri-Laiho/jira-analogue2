@@ -32,7 +32,7 @@ abstract class TUIElement implements Runnable {
 
     /**
      * Returns the absolute row coordinate of given relative coordinate in the TextGraphics object
-     * <p>
+     *
      * All TUI elements should draw elements using these methods without considering their
      * location on the screen.
      *
@@ -41,13 +41,13 @@ abstract class TUIElement implements Runnable {
      */
     int getAbsoluteRow(int relativeRow) {
         if (parent == null)
-            return row + relativeRow;
-        return parent.getAbsoluteRow(row + relativeRow);
+            return row+relativeRow;
+        return parent.getAbsoluteRow(row+relativeRow);
     }
 
     /**
      * Returns the absolute column coordinate of given relative coordinate in the TextGraphics object
-     * <p>
+     *
      * All TUI elements should draw elements using these methods without considering their
      * location on the screen.
      *
@@ -56,13 +56,13 @@ abstract class TUIElement implements Runnable {
      */
     int getAbsoluteColumn(int relativeColumn) {
         if (parent == null)
-            return column + relativeColumn;
-        return parent.getAbsoluteColumn(column + relativeColumn);
+            return column+relativeColumn;
+        return parent.getAbsoluteColumn(column+relativeColumn);
     }
 
     String nChars(int n, char c) {
         StringBuilder sb = new StringBuilder(n);
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; i++){
             sb.append(c);
         }
         return sb.toString();
@@ -99,10 +99,9 @@ abstract class TUIElement implements Runnable {
 
     /**
      * Constructor without a parent TUIElement
-     *
      * @param terminal Terminal
-     * @param screen   Screen
-     * @param tg       TextGraphics
+     * @param screen Screen
+     * @param tg TextGraphics
      */
     TUIElement(Terminal terminal, Screen screen, TextGraphics tg) {
         this.terminal = terminal;
@@ -119,10 +118,9 @@ abstract class TUIElement implements Runnable {
 
     /**
      * Constructor with a parent TUIElement
-     *
      * @param terminal Terminal
-     * @param screen   Screen
-     * @param tg       TextGraphics
+     * @param screen Screen
+     * @param tg TextGraphics
      */
     TUIElement(Terminal terminal, Screen screen, TextGraphics tg, TUIElement parent) {
         this.terminal = terminal;

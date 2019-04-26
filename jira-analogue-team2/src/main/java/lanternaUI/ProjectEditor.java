@@ -80,7 +80,7 @@ class ProjectEditor extends BasicWindow {
         taskData.setTableModel(tableModel);
         taskData.invalidate();
 
-        actionListBox.setSelectedIndex(selectedTask + extraOptionCount);
+        actionListBox.setSelectedIndex(selectedTask+extraOptionCount);
         actionListBox.takeFocus();
     }
 
