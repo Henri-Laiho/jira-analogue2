@@ -301,7 +301,8 @@ public class TextEdit extends KeyBoardTUIElement {
                     putString(start, i,
                             row.substring(Math.min(view_column, end), Math.min(end, view_column + max_visible_columns))
                                     + nChars(Math.max(0, view_column + max_visible_columns - end), ' '));
-                } else*/ {
+                } else*/
+                {
                     putString(0, i,
                             row.substring(Math.min(view_column, row.length()), Math.min(row.length(), view_column + max_visible_columns))
                                     + nChars(Math.max(0, view_column + max_visible_columns - row.length()), ' '));

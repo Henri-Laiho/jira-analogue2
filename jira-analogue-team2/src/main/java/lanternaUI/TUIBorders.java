@@ -24,12 +24,11 @@ class TUIBorders extends TUIElement {
         //idea for a flashy UI if I get time later: bunch of loops that create a border that changes color, fades away into black, fades into new color, fades away.. etc, might be easier with another TUI
         //Lanterna operates on three layers: terminal, background, foreground, this could be useful in designing an UI
         for (int i = 0; i < 10; i++) {
-            bg.putString(4, i+2, "|");
-            bg.putString(69, i+2, "|");
+            bg.putString(4, i + 2, "|");
+            bg.putString(69, i + 2, "|");
         }
         bg.putString(4, 2, "==================================================================");
         bg.putString(4, 12, "==================================================================");
-
 
 
     }
