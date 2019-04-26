@@ -28,7 +28,7 @@ class ProjectSelector extends BasicWindow {
         textBox.setText("User: " + ClientMain.getUser());
         sidePanel.addComponent(textBox);
 */
-       //code for another panel above
+        //code for another panel above
         actionListBox = new ActionListBox();
         panel.addComponent(new Label("User: " + ClientMain.getUser() + "\nYou are a collaborator in these projects.\nSelect a project to open:"));
         panel.addComponent(actionListBox);

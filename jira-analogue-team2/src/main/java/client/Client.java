@@ -1,11 +1,11 @@
 package client;
 
-import lanternaUI.TUI;
 import common.Connection;
 import common.Project;
 import common.Task;
 import common.User;
 import data.*;
+import lanternaUI.TUI;
 import messages.JiraMessageHandler;
 import messages.MessageType;
 import messages.Session;
@@ -32,6 +32,7 @@ public class Client implements JiraMessageHandler {
      * Request the list of projects for this user from the server;
      * (wait for response containing the list;)
      * and start terminal window.
+     *
      * @param args
      * @throws IOException
      * @throws InterruptedException
@@ -40,6 +41,7 @@ public class Client implements JiraMessageHandler {
         updateProjects();
         tui.startTerminal(args);
     }
+
     void startProjectTUI(String[] args) throws IOException, InterruptedException {
         updateProjects();
         tui.setEditProject(true);
@@ -57,8 +59,8 @@ public class Client implements JiraMessageHandler {
             return user.getRightsInProject(openedProject);
         else
             return 1;
-            //TODO: remove comments and make the user rights system work:
-            //throw new RuntimeException("getUserRightsInProject when user is null");
+        //TODO: remove comments and make the user rights system work:
+        //throw new RuntimeException("getUserRightsInProject when user is null");
     }
 
     public Project getOpenedProject() {
@@ -84,6 +86,7 @@ public class Client implements JiraMessageHandler {
     /**
      * Request the list of projects for this user from the server;
      * and wait for response containing the list.
+     *
      * @return
      * @throws IOException
      * @throws InterruptedException
@@ -107,9 +110,10 @@ public class Client implements JiraMessageHandler {
 
     /**
      * Tries to connect to the server until the server accepts the connection.
+     *
      * @param serverIP server IP.
-     * @param port server Port.
-     * @param session the session from previous login or null if not yet logged in.
+     * @param port     server Port.
+     * @param session  the session from previous login or null if not yet logged in.
      * @throws IOException
      * @throws InterruptedException
      */
@@ -139,24 +143,25 @@ public class Client implements JiraMessageHandler {
 
     /**
      * Makes sure the client is connected to the server. If client is not connected, tries to connect with the session information
+     *
      * @return true if connection is still open or managed to reconnect. False if failed to reconnect or client is not logged in.
      * @throws IOException
      * @throws InterruptedException
      */
     boolean reconnect() throws IOException, InterruptedException {
         if (isConnected() || clientSession != null) {
-            while(!isConnected()) {
+            while (!isConnected()) {
                 connect(clientSession);
             }
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
 
     /**
      * Request the selected project from server.
+     *
      * @param index index of the project in arrays projectNameList.projectNames and .projectIds.
      * @return true if the client received the project, false otherwise.
      * @throws IOException
@@ -172,6 +177,7 @@ public class Client implements JiraMessageHandler {
 
     /**
      * Try to log in to the server
+     *
      * @param username username or email.
      * @param password password.
      * @return true if logged in succesfully, false otherwise.

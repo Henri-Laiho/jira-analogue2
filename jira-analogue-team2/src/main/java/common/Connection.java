@@ -12,16 +12,15 @@ import java.net.Socket;
 
 /**
  * A helper class for implementing the minijira-protocol on server-side and client-side
- *
+ * <p>
  * The overrided message handling methods return false if called on the wrong side, otherwise
  * call the real message handling methods in client or server classes.
- *
+ * <p>
  * server-side example:
  * {@code try(common.Connection connection = new common.Connection(server, socket)) {//try to read message from client}}
- *
+ * <p>
  * client-side example:
  * {@code try(common.Connection connection = new common.Connection(client, new Socket(ip, port))) {//send messages and requests to server}}
- *
  */
 public class Connection extends ProtocolConnection implements Closeable {
     public static final int DEFAULT_PORT = 28015;
@@ -32,16 +31,15 @@ public class Connection extends ProtocolConnection implements Closeable {
      * Constructor
      *
      * @param msgHandler the client object if used on client-side or server object if used on server-side.
-     *                       The server-side message handling methods return false if called on client-side.
-     * @param socket the socket that represents the connection between client and server.
-     *               The socket will be closed when the common.Connection is closed by the close() method.
+     *                   The server-side message handling methods return false if called on client-side.
+     * @param socket     the socket that represents the connection between client and server.
+     *                   The socket will be closed when the common.Connection is closed by the close() method.
      * @throws IOException if the socket is not connected or an I/O error occurs when creating the input or output stream.
      */
     public Connection(Session session, JiraMessageHandler msgHandler, Socket socket) throws IOException {
         super(session, new DataOutputStream(socket.getOutputStream()), new DataInputStream(socket.getInputStream()), msgHandler);
         this.socket = socket;
     }
-
 
 
     public boolean isClosed() {

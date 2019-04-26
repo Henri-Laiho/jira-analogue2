@@ -3,7 +3,6 @@ package common;
 import data.RawUser;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class User {
 
@@ -83,7 +82,7 @@ public class User {
     // allProjects must be in order.
     public RawUser toRawUser(List<Project> allProjects) {
 
-        long[] projectIds = projects.stream().mapToLong(p->p.getProjectId()).toArray();
+        long[] projectIds = projects.stream().mapToLong(p -> p.getProjectId()).toArray();
 
         int[] projectRightsEnums = allProjects.stream().mapToInt(p -> {
             Integer rights = projectRights.get(p);
@@ -95,7 +94,7 @@ public class User {
 
         long[] friendsIds = friendList.stream().mapToLong(u -> u.getUserId()).toArray();
 
-        return new RawUser(userId, username, passwordHash, userEmail, lastOnlineMS,projectIds,projectRightsEnums, friendsIds);
+        return new RawUser(userId, username, passwordHash, userEmail, lastOnlineMS, projectIds, projectRightsEnums, friendsIds);
     }
 
 
