@@ -16,9 +16,13 @@ import common.Task;
 import data.RawTask;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
+import static common.Constants.DATETIME_FORMAT;
 
 /**
  * Text User Interface
@@ -76,7 +80,7 @@ public class TUI {
      * @param args command line arguments, TODO: if contains search option, autoimatically search and open the project (request the project from server).
      * @throws IOException if there is an i/o error
      */
-    public void startTerminal(String[] args) throws IOException, InterruptedException {
+    public void startTerminal(String[] args) throws IOException {
         System.out.println("Opening terminal.");
 
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
@@ -92,20 +96,20 @@ public class TUI {
         ;
 
         screen = new TerminalScreen(terminal);
-        tg = screen.newTextGraphics();
-        bg = screen.newTextGraphics();
 
         screen.startScreen();
+        /*tg = screen.newTextGraphics();
+        bg = screen.newTextGraphics();
         bg.setBackgroundColor(TextColor.ANSI.BLACK);
         tg.putString(6, 4, "welcome to the minjira text user interface");
         tg.putString(6, 5, "select project name (up and down arrow, hit enter to select):");
         tg.putString(6, 25, "hit ESC to exit");
         TUIBorders tuiBorders = new TUIBorders(screen, bg);
         tuiBorders.runBorder();
-        screen.refresh();
+        screen.refresh();*/
         terminalRunning = true;
-        int i = 0;
-        boolean hit = false;
+        //int i = 0;
+        //boolean hit = false;
 
         MultiWindowTextGUI gui = new MultiWindowTextGUI(screen, new DefaultWindowManager(), new EmptySpace(TextColor.ANSI.CYAN));
 
@@ -131,12 +135,14 @@ public class TUI {
                                     List<String> completed = new ArrayList<>();
                                     List<String> priorities = new ArrayList<>();
                                     List<String> deadlines = new ArrayList<>();
-                                    project.getTasklist().forEach(task -> {
+
+                                    Consumer<Task> taskAdder = task -> {
                                         titles.add(task.getTitle());
                                         completed.add(task.isCompleted() ? "Done" : "Not Done");
                                         priorities.add(String.valueOf(task.getPriority()));
-                                        deadlines.add(task.getDeadline().toString());
-                                    });
+                                        deadlines.add(task.getDeadline() == null ? null : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+                                    };
+                                    project.getTasklist().forEach(taskAdder);
 
                                     ProjectEditor projectEditor = new ProjectEditor();
                                     projectEditor.setListener(new ProjectEditor.TaskSelectedListener() {
@@ -148,7 +154,9 @@ public class TUI {
                                             projectEditor.close();
                                             TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
                                                 try {
-                                                    client.sendUpdateTask(task);
+                                                    client.sendUpdateTask(task1);
+                                                    taskAdder.accept(task1);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -166,7 +174,9 @@ public class TUI {
 
                                             TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
                                                 try {
-                                                    client.sendCreateTask(task);
+                                                    client.sendCreateTask(task1);
+                                                    taskAdder.accept(task1);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -252,7 +262,7 @@ public class TUI {
      *
      * @param openedProject the project to display to the user.
      */
-    private void projectUi(Project openedProject, int rights) {
+    /*private void projectUi(Project openedProject, int rights) {
         List<String> options = new ArrayList<>();
         options.add("Create task");
 
@@ -277,7 +287,7 @@ public class TUI {
         } else {
             editTaskUi(openedProject, openedProject.getTasklist().get(itemIndex - extraoptions));
         }
-    }
+    }*/
 
     /**
      * Lets the user edit a project: view tasks and create more.
@@ -285,7 +295,7 @@ public class TUI {
      * @param task the task to be edited or null if a new task should be created.
      * @return true if task was edited or created.
      */
-    private boolean editTaskUi(Project project, Task task) {
+    /*private boolean editTaskUi(Project project, Task task) {
         boolean newtask = false;
         if (task == null) {
             newtask = true;
@@ -305,7 +315,7 @@ public class TUI {
             //return false;
         }
         return true;
-    }
+    }*/
 
     /**
      * Update the list of projects

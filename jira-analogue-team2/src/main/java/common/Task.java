@@ -104,6 +104,30 @@ public class Task {
         return masterTask;
     }
 
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public void setDeadline(Date deadline) {
+        this.deadline = deadline;
+    }
+
+    public void setMasterTask(Task masterTask) {
+        this.masterTask = masterTask;
+    }
+
     public List<User> getEmployees() {
         return employees;
     }

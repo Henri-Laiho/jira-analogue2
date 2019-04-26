@@ -2,91 +2,198 @@ package lanternaUI;
 
 import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.*;
-import com.googlecode.lanterna.gui2.dialogs.MessageDialog;
+import com.googlecode.lanterna.gui2.table.Table;
+import com.googlecode.lanterna.gui2.table.TableModel;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import common.Task;
 
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.logging.SimpleFormatter;
+
+import static common.Constants.DATETIME_FORMAT;
 
 public class TaskEditor extends BasicWindow {
     interface TaskEditedListener {
-        void partSelected(int taskIndex);
-        //void taskEdited(Task task);
+        void taskEdited(Task task);
     }
 
+    interface TextFieldEditedListener {
+        void textFieldEdited(String newValue);
+    }
 
-    private TaskEditedListener listener = null;
+    private static final String[] fieldNames = {"Title", "Description", "Is Done", "Priority", "Deadline"};
+
+    private Panel panel;
+    private TaskEditedListener listener;
     private List<Task> tasks;
-    private Panel panel = new Panel();
-    private List<TextBox> inputFields = new ArrayList<TextBox>();
-    //private Table<String> taskTable;
+    private Table<String> taskTable;
+    private Label editingFieldNameLabel;
+    private TextBox fieldEditor;
+    private Button cancelBtn;
+    private Button saveBtn;
+    private Task task;
 
+    private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
+        editingFieldNameLabel.setText(fieldNames[fieldIndex]);
+        fieldEditor.setText(initial);
+        fieldEditor.setPreferredSize(new TerminalSize(20, multiline ? 10 : 1));
 
-    public TaskEditor(Task task, int userRights, List<Task> tasks, MultiWindowTextGUI gui, TaskEditedListener listener) {
+        fieldEditor.setInputFilter((interactable, keyStroke) -> {
+            if (filter == null || filter.onInput(interactable, keyStroke)) {
+                if ((!multiline || fieldEditor.getCaretPosition().getRow() == 0)
+                        && keyStroke.getKeyType() == KeyType.ArrowUp
+                        || (!multiline || fieldEditor.getCaretPosition().getRow() == fieldEditor.getLineCount() - 1)
+                        && keyStroke.getKeyType() == KeyType.ArrowDown
+                        || keyStroke.getKeyType() == KeyType.Tab)
+                    return false;
+                if (keyStroke.getKeyType() == KeyType.Escape) {
+                    resetTextField();
+                    return false;
+                }
+                if ((!multiline || keyStroke.isCtrlDown()) && keyStroke.getKeyType() == KeyType.Enter) {
+                    if (listener != null)
+                        listener.textFieldEdited(fieldEditor.getText());
+                    resetTextField();
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        });
+
+        fieldEditor.setEnabled(true);
+        fieldEditor.takeFocus();
+
+    }
+
+    private void resetTextField() {
+        taskTable.takeFocus();
+        fieldEditor.setEnabled(false);
+        fieldEditor.setText("");
+        editingFieldNameLabel.setText("");
+        fieldEditor.setPreferredSize(new TerminalSize(0, 0));
+    }
+
+    private void refreshScreen() {
+        TableModel<String> taskDataInfo = new TableModel<>();
+        for (String fieldName : fieldNames) {
+            taskDataInfo.addColumn(fieldName, null);
+        }
+        taskDataInfo.addRow(
+                task.getTitle(),
+                task.getDescription(),
+                task.isCompleted() ? "X" : " ",
+                String.valueOf(task.getPriority()),
+                task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+        taskTable.setTableModel(taskDataInfo);
+    }
+
+    public TaskEditor(Task task, int userRights, List<Task> tasks, TaskEditedListener listener) {
+        this.task = task;
         setCloseWindowWithEscape(true);
-        panel = panel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+        panel = new Panel();
+        panel.setLayoutManager(new GridLayout(2));
 
         this.tasks = tasks;
         this.listener = listener;
-        panel.addComponent(new Label("Edit task"));
+        panel.addComponent(new Label("Select column:"));
         panel.addComponent(new EmptySpace());
 
-        TextBox title = add_property_to_tui("Title", task.getTitle(), 70, 1, null);
-        TextBox priority = add_property_to_tui("Priority", String.valueOf(task.getPriority()), 2, 1, "[0-9]"); // really bad solution
-        //TextBox deadline = add_property_to_tui("Deadline (BAD REPRESENTATION FIXME)", String.valueOf(task.getDeadline().getTime()), 70, 1, null);
-        TextBox description = add_property_to_tui("Description", task.getDescription(), 70, 8, null);
+        taskTable = new Table<>(fieldNames);
+        refreshScreen();
 
-        Button saveChanges = new Button("Save changes", () -> {
-            System.out.println("Not saving changes.");
-            String errors = "";
-            int priorityVal = 0;
-            //Date deadlineVal = task.getDeadline();
+        //selects which part to edit (editing not implemented)
+        /*for (int i = 0; i < taskDataInfo.getColumnCount(); i++) {
+            int selectedI = i;
+            actionListBox.addItem(String.valueOf(taskDataInfo.getColumnLabel(i)), () -> {
+                if (listener != null) {
+                    listener.partSelected(selectedI);
+                }
+            });
+        }*/
 
-            try {
-                priorityVal = Integer.valueOf(priority.getText());
-            } catch (NumberFormatException e) {
-                errors += "Invalid priority. Must be \"[0-9]\".\n";
+        taskTable.setCellSelection(true);
+        taskTable.setSelectAction(() -> {
+            switch (taskTable.getSelectedColumn()) {
+                case 0:
+                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getTitle(), false, null, newValue -> {
+                        TaskEditor.this.task.setTitle(newValue);
+                        refreshScreen();
+                    });
+                    break;
+                case 1:
+                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getDescription(), true, null, newValue -> {
+                        TaskEditor.this.task.setDescription(newValue);
+                        refreshScreen();
+                    });
+                    break;
+                case 2:
+                    TaskEditor.this.task.setCompleted(!TaskEditor.this.task.isCompleted());
+                    refreshScreen();
+                    break;
+                case 3:
+                    editText(taskTable.getSelectedColumn(), String.valueOf(TaskEditor.this.task.getPriority()), false,
+                            (interactable, keyStroke) ->
+                                    keyStroke.getKeyType() != KeyType.Character
+                                            || keyStroke.getCharacter().toString().matches("[\\d\\-]"),
+                            newValue -> {
+                                TaskEditor.this.task.setPriority(Integer.parseInt(newValue));
+                                refreshScreen();
+                            });
+                    break;
+                case 4:
+                    editText(taskTable.getSelectedColumn(), task.getDeadline() == null ? DATETIME_FORMAT : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()), false,
+                            (interactable, keyStroke) ->
+                                    keyStroke.getKeyType() != KeyType.Character
+                                            || keyStroke.getCharacter().toString().matches("[\\d.:]"), newValue -> {
+                                try {
+                                    Date newdate = new SimpleDateFormat(DATETIME_FORMAT).parse(newValue);
+                                    TaskEditor.this.task.setDeadline(newdate);
+                                    refreshScreen();
+                                } catch (ParseException e) {
+                                    System.out.println("Cannot parse date: " + newValue);
+                                    throw new RuntimeException("Cannot parse date: " + newValue);
+                                }
+                            });
+                    break;
+                default:
             }
-                /*try{
-                    deadlineVal = new Date(Long.valueOf(deadline.getText()));
-                } catch(IllegalArgumentException e){
-                    errors += "Invalid date, must be \"yyyy-[m]m-[d]d\".\n";
-                }*/
-            if (errors.equals("")) {
-                task.setTitle(title.getText());
-                task.setPriority(priorityVal);
-                //task.setDeadline(deadlineVal);
-                task.setDescription(description.getText());
-                this.close();
-            } else {
-                MessageDialog.showMessageDialog(gui, "Task can't be saved because of following errors", errors);
-            }
-        }
-        );
-        panel.addComponent(saveChanges);
+        });
+        panel.addComponent(taskTable);
+        panel.addComponent(new EmptySpace());
+
+        editingFieldNameLabel = new Label("");
+        fieldEditor = new TextBox(new TerminalSize(0, 0), TextBox.Style.MULTI_LINE);
+        fieldEditor.setEnabled(false);
+        panel.addComponent(editingFieldNameLabel);
+        panel.addComponent(new EmptySpace());
+        panel.addComponent(fieldEditor);
+
+        cancelBtn = new Button("Cancel");
+        cancelBtn.addListener(button -> TaskEditor.this.close());
+
+        saveBtn = new Button("Save");
+        saveBtn.addListener(button -> {
+            if (TaskEditor.this.listener != null)
+                TaskEditor.this.listener.taskEdited(TaskEditor.this.task);
+            TaskEditor.this.close();
+        });
+
+        panel.addComponent(new EmptySpace());
+        panel.addComponent(saveBtn);
+        panel.addComponent(cancelBtn);
+
         setComponent(panel);
 
 
     }
 
-    /**
-     * @param validatorRegex may be null
-     */
-    private TextBox add_property_to_tui(String name, String initialContent, int columns, int rows, String validatorRegex) {
-
-        TextBox input = new TextBox(new TerminalSize(columns, rows), initialContent);
-        if (validatorRegex != null) {
-            input.setValidationPattern(Pattern.compile(validatorRegex));
-        }
-        panel.addComponent(new Label(name));
-        panel.addComponent(input);
-        panel.addComponent(new EmptySpace());
-        return input;
-    }
-
-    public TaskEditor(Task task, int userRights, MultiWindowTextGUI gui, List<Task> tasks) {
-        this(task, userRights, tasks, gui, null);
+    public TaskEditor(Task task, int userRights, List<Task> tasks) {
+        this(task, userRights, tasks, null);
     }
 
 
