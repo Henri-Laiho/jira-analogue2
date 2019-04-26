@@ -14,7 +14,6 @@ class SelectionMenu extends KeyBoardTUIElement {
     interface SelectionMenuListener {
         /**
          * Called if user pressed enter to select an item.
-         *
          * @param itemIndex index of the selected item in the selection list.
          * @return false if SelectionMenu should be closed, true if user can select another item.
          */
@@ -62,7 +61,7 @@ class SelectionMenu extends KeyBoardTUIElement {
                 if (listener != null) listener.onItemSelected(-1);
                 return false;
             case ArrowUp:
-                if (index < selection.size() - 1) {
+                if (index < selection.size()-1) {
                     index += 1;
                     tg.putString(6, 7, "                            ");
                     tg.putString(6, 7, selection.get(index), SGR.BOLD);
@@ -118,7 +117,6 @@ class SelectionMenu extends KeyBoardTUIElement {
 
     /**
      * Blocks and lets user select an item from the list until user presses ESC or enter to select an item.
-     *
      * @return the index of the item in the list selection or -1 if no item was selected.
      */
     public int runForSelectedItemIndex() {

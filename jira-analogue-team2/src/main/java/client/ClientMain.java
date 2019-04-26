@@ -15,11 +15,9 @@ public class ClientMain {
     private static void setUserNow(String userNow) {
         ClientMain.userNow = userNow;
     }
-
     public static String getUser() {
         return userNow;
     }
-
     private static boolean connectToServer(String serverName, CommandLine cmd, Client client) throws IOException, InterruptedException {
 
         // open connection
@@ -99,7 +97,8 @@ public class ClientMain {
             if (Client.getProjectList().contains(projectName)) { //seperate non-static class + new method in Client?
                 client.startProjectTUI(args);
             }
-        }*/ else if (connectToServer(serverName, cmd, client)) {
+        }*/
+        else if (connectToServer(serverName, cmd, client)) {
             client.startTUI(args);
         }
 

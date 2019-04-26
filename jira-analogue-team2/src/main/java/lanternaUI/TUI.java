@@ -10,7 +10,6 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
-import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import common.Project;
 import common.Task;
 import data.RawTask;
@@ -86,15 +85,6 @@ public class TUI {
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
 
         terminal = dtf.createTerminal();
-
-        // Automatically close terminal when exit button is pressed. This makes special exit/EOF handling
-        // unnecessary. Swing uses System.exit to close the JVM.
-        if (terminal instanceof SwingTerminalFrame) {
-            SwingTerminalFrame stf = (SwingTerminalFrame) terminal;
-            stf.setDefaultCloseOperation(stf.EXIT_ON_CLOSE);
-        }
-        ;
-
         screen = new TerminalScreen(terminal);
 
         screen.startScreen();
@@ -152,7 +142,7 @@ public class TUI {
                                             Task task = project.getTasklist().get(taskIndex);
 
                                             projectEditor.close();
-                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
                                                 try {
                                                     client.sendUpdateTask(task1);
                                                     taskAdder.accept(task1);
@@ -172,7 +162,7 @@ public class TUI {
                                                     "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
                                                     null, null, null));
 
-                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), gui, task1 -> {
+                                            TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
                                                 try {
                                                     client.sendCreateTask(task1);
                                                     taskAdder.accept(task1);

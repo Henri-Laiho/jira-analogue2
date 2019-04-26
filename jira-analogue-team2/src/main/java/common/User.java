@@ -3,20 +3,9 @@ package common;
 import data.RawUser;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class User {
-
-    private RawUser rawUser;
-
-    private long userId;
-    private String username;
-    private byte[] passwordHash = null;
-    private String userEmail = null;
-    private Long lastOnlineMS = null;
-    private List<Project> projects = null;  // KNOW WHEN TO UPDATE THIS
-    private HashMap<Project, Integer> projectRights = null;  // KNOW WHEN TO UPDATE THIS
-    private List<User> friendList = null;  // KNOW WHEN TO UPDATE THIS
-
     public long getUserId() {
         return userId;
     }
@@ -61,7 +50,7 @@ public class User {
             for (Project project : projects) {
                 int search;
                 if ((search = Arrays.binarySearch(rawUser.projects, project.getProjectId())) >= 0) {
-                    this.projects.add(project);
+                    projects.add(project);
                     indexes[i] = search;
                     i++;
                 }
@@ -78,25 +67,6 @@ public class User {
 
         rawUser = null;
     }
-
-    // allProjects must be in order.
-    public RawUser toRawUser(List<Project> allProjects) {
-
-        long[] projectIds = projects.stream().mapToLong(p -> p.getProjectId()).toArray();
-
-        int[] projectRightsEnums = allProjects.stream().mapToInt(p -> {
-            Integer rights = projectRights.get(p);
-            if (rights == null) {
-                return 0;
-            }
-            return rights;
-        }).toArray();
-
-        long[] friendsIds = friendList.stream().mapToLong(u -> u.getUserId()).toArray();
-
-        return new RawUser(userId, username, passwordHash, userEmail, lastOnlineMS, projectIds, projectRightsEnums, friendsIds);
-    }
-
 
     public byte[] getPasswordHash() {
         return passwordHash;
@@ -130,4 +100,15 @@ public class User {
     public int hashCode() {
         return Objects.hash(userId, username);
     }
+
+    private RawUser rawUser;
+
+    private long userId;
+    private String username;
+    private byte[] passwordHash = null;
+    private String userEmail = null;
+    private Long lastOnlineMS = null;
+    private List<Project> projects = null;
+    private HashMap<Project, Integer> projectRights = null;
+    private List<User> friendList = null;
 }
