@@ -1,6 +1,7 @@
 package common;
 
 import data.RawUser;
+import server.ServerUser;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ public class User {
             Arrays.sort(rawUser.projects);
     }
 
-    public void initialize(List<User> users, List<Project> projects) {
+    public void initialize(List<ServerUser> users, List<Project> projects) {
         if (rawUser.friendList != null) {
             for (User user : users) {
                 if (Arrays.binarySearch(rawUser.friendList, user.getUserId()) >= 0) {
@@ -117,17 +118,20 @@ public class User {
         return 0;
     }
 
+    public boolean isInitialized() {
+        return rawUser == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return userId == user.userId &&
-                Objects.equals(username, user.username);
+        return userId == user.userId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, username);
+        return Objects.hash(userId);
     }
 }

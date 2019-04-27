@@ -3,6 +3,7 @@ package server;
 import auth.SecurityHelper;
 import common.Connection;
 import common.Project;
+import common.Task;
 import common.User;
 import data.*;
 import messages.JiraMessageHandler;
@@ -11,16 +12,21 @@ import messages.Session;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.ToLongFunction;
 
 public class SessionForClient implements Runnable, JiraMessageHandler {
     private Connection connection;
     private Session session;
     private Server server;
     private User user;
+    private Project openedProject;
 
     public SessionForClient(Server server, Socket socket) throws IOException {
         this.server = server;
@@ -73,7 +79,28 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
 
     @Override
     public RawError updateTask(RawTask message) {
-        return new RawError("Not yet implemented :(");
+        if (openedProject == null)
+            return new RawError("You have not opened a project yet.");
+
+        Task newTask = new Task(message);
+        if (server.getTasks().contains(newTask)) {
+            Task task = server.getTasks().get(server.getTasks().indexOf(newTask));
+            if (openedProject.getTasklist().contains(task)) {
+                task.update(newTask, server.getTasks(), server.getUsers(), server.getProjects());
+                try {
+                    connection.sendMessage(null, MessageType.RESPONSE);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return null;
+            }
+            else {
+                return new RawError("This task is not in the currently opened project.");
+            }
+        }
+        else {
+            return new RawError("Can't update task: The task does not exist.");
+        }
     }
 
     @Override
@@ -154,6 +181,7 @@ public class SessionForClient implements Runnable, JiraMessageHandler {
                     Project project = user.getProjects().get(i);
                     try {
                         connection.sendMessage(project.toRawProject(), MessageType.SETPROJECT);
+                        openedProject = project;
                         return null;
                     } catch (IOException e) {
                         throw new RuntimeException(e);

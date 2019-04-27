@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import common.Connection;
 import common.Project;
+import common.Task;
 import common.User;
 import data.RawProject;
 import data.RawTask;
@@ -33,8 +34,9 @@ class Server implements Runnable {
 
     private final int port;
     private List<Project> projects = new ArrayList<>();
-    private List<User> users = new ArrayList<>();
-    private HashMap<User, byte[]> userSalts = new HashMap<>();
+    private List<Task> tasks = new ArrayList<>();
+    private List<ServerUser> users = new ArrayList<>();
+    //private HashMap<User, byte[]> userSalts = new HashMap<>();
     private List<SessionForClient> sessions = new ArrayList<>();
     private long lastSessionID = -1;
     private boolean running = false;
@@ -43,8 +45,12 @@ class Server implements Runnable {
         return projects;
     }
 
-    List<User> getUsers() {
+    List<ServerUser> getUsers() {
         return users;
+    }
+
+    List<Task> getTasks() {
+        return tasks;
     }
 
     Server() {
@@ -55,18 +61,18 @@ class Server implements Runnable {
         this.port = port;
     }
 
-    User createUser(String userName, String password, String email) {
+    ServerUser createUser(String userName, String password, String email) {
         byte[] salt = SecurityHelper.generateSalt();
-        User newUser = null;
+        ServerUser newUser = null;
         try {
-            newUser = new User(new RawUser(
+            newUser = new ServerUser(new RawServerUser(
                     getNewValidUserID(), userName, SecurityHelper.passwordToHash(password, salt),
-                    email, System.currentTimeMillis(), null, null, null));
+                    email, System.currentTimeMillis(), null, null, null, salt));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new RuntimeException(e);
             //return null;
         }
-        userSalts.put(newUser, salt);
+        //userSalts.put(newUser, salt);
         users.add(newUser);
         return newUser;
     }
@@ -78,17 +84,18 @@ class Server implements Runnable {
             RawServerData rawData = gson.fromJson(json, RawServerData.class);
 
 
-            if (rawData.userSalts.size() != rawData.rawUsers.size()) {
+            /*if (rawData.userSalts.size() != rawData.rawUsers.size()) {
                 throw new JsonSyntaxException("Corrupt file (rawData.userSalts.size() != rawData.rawUsers.size()).");
-            }
+            }*/
 
             // Convert types
             projects = rawData.rawProjects.stream().map(rp -> new Project(rp)).collect(Collectors.toList());
-            users = rawData.rawUsers.stream().map(ru -> new User(ru)).collect(Collectors.toList());
+            tasks = rawData.rawTasks.stream().map(rp -> new Task(rp)).collect(Collectors.toList());
+            users = rawData.rawUsers.stream().map(ru -> new ServerUser(ru)).collect(Collectors.toList());
 
-            for (int i = 0; i < users.size(); i++) {
+            /*for (int i = 0; i < users.size(); i++) {
                 userSalts.put(users.get(i), rawData.userSalts.get(i));
-            }
+            }*/
 
         } catch (IOException e) {
             System.out.println("ERROR: Can't open server data file");
@@ -123,6 +130,12 @@ class Server implements Runnable {
                 new RawTask(4, true, "A Completed Task", "do something", 1, 201L,
                         1576800000000L, 1545264000000L, -1L, null, null)
         };
+        for (RawTask rawTask : tasks1) {
+            tasks.add(new Task(rawTask));
+        }
+        for (RawTask rawTask : tasks2) {
+            tasks.add(new Task(rawTask));
+        }
         projects.add(new Project(new RawProject(10, tasks1, "Project Hello World", "no repo")));
         projects.add(new Project(new RawProject(11, tasks2, "Hello World Project", "no repository")));
 
@@ -134,14 +147,16 @@ class Server implements Runnable {
 
     void saveData() {
         var rawProjects = projects.stream().map(p -> p.toRawProject()).collect(Collectors.toList());
+        var rawTasks = tasks.stream().map(p -> p.toRawTask()).collect(Collectors.toList());
         var rawUsers = users.stream().map(u -> u.toRawUser(projects)).collect(Collectors.toList());
-        var saltsData = users.stream().map(u -> userSalts.get(u)).collect(Collectors.toList());
+        //var saltsData = users.stream().map(u -> userSalts.get(u)).collect(Collectors.toList());
 
         var rawData = new RawServerData();
 
         rawData.rawProjects = rawProjects;
+        rawData.rawTasks = rawTasks;
         rawData.rawUsers = rawUsers;
-        rawData.userSalts = saltsData;
+        //rawData.userSalts = saltsData;
 
 
         var gson = new GsonBuilder().setPrettyPrinting().create(); // For easyer debugging.
@@ -160,7 +175,10 @@ class Server implements Runnable {
 
     void initialize() {
         for (Project project : projects) {
-            project.initialize(users, projects);
+            project.initialize(tasks);
+        }
+        for (Task task : tasks) {
+            task.initialize(tasks, users, projects);
         }
         for (User user : users) {
             user.initialize(users, projects);
@@ -215,7 +233,7 @@ class Server implements Runnable {
     }
 
     byte[] getUserSalt(User user) {
-        return userSalts.getOrDefault(user, null);
+        return users.get(users.indexOf(user)).getSalt();
     }
 
 

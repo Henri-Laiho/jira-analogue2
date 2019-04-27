@@ -1,11 +1,10 @@
 package common;
 
 import data.RawTask;
+import server.ServerUser;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.ToLongFunction;
 
 public class Task {
 
@@ -21,6 +20,21 @@ public class Task {
     private Task masterTask;  // KNOW WHEN TO UPDATE THIS
     private List<User> employees = new ArrayList<>();   // KNOW WHEN TO UPDATE THIS
     private List<Project> projects = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
+
+    public void update(Task other, List<Task> taskList, List<ServerUser> users, List<Project> projects) {
+        this.taskId = other.taskId;
+        this.isCompleted = other.isCompleted;
+        this.title = other.title;
+        this.description = other.description;
+        this.priority = other.priority;
+        this.deadline = other.deadline;
+        this.dateCreated = other.dateCreated;
+        rawTask = other.rawTask;
+        rawTask.boards = null;
+        masterTask = null;
+        employees.clear();
+        initialize(taskList, users, projects);
+    }
 
     public Task(RawTask rawTask) {
         this.rawTask = rawTask;
@@ -39,7 +53,7 @@ public class Task {
             Arrays.sort(rawTask.boards);
     }
 
-    public void initialize(List<Task> taskList, List<User> users, List<Project> projects) {
+    public void initialize(List<Task> taskList, List<ServerUser> users, List<Project> projects) {
         if (rawTask.masterTaskId != null)
             for (Task task : taskList) {
                 if (task.taskId == rawTask.masterTaskId && task.taskId != taskId) {
@@ -66,6 +80,7 @@ public class Task {
                 }
             }
         }
+        rawTask = null;
     }
 
     public boolean isCompleted() {
@@ -128,6 +143,10 @@ public class Task {
         this.masterTask = masterTask;
     }
 
+    public List<Project> getProjects() {
+        return projects;
+    }
+
     public List<User> getEmployees() {
         return employees;
     }
@@ -158,5 +177,22 @@ public class Task {
         // create the RawTask.
         return new RawTask(taskId, isCompleted, title, description, priority, createdBy == null ? null : createdBy.getUserId(), deadline == null ? null : deadline.getTime(),
                 dateCreated == null ? null : dateCreated.getTime(), masterTask == null ? null : masterTask.taskId, assignedEmployees, boards);
+    }
+
+    public boolean isInitialized() {
+        return rawTask == null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return taskId == task.taskId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskId);
     }
 }

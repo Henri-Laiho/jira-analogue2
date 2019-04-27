@@ -248,7 +248,7 @@ public class Client implements JiraMessageHandler {
     @Override
     public RawError setProject(RawProject message) {
         System.out.println("Received project data");
-        openedProject = new Project(message);
+        openedProject = new ClientProject(message);
         return null;
     }
 }

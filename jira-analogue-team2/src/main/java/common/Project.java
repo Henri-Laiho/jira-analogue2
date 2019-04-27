@@ -6,25 +6,24 @@ import data.RawTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Project {
 
     private static final long MAX_TASKS = Short.MAX_VALUE;
 
     private long projectId = -1;
-    private List<Task> tasklist = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
+    protected List<Task> tasklist = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
     private String projectName = null;
     private String repositoryUrl = null;
     private long lastTaskID = -1;
+    private RawProject data;
 
     public Project(RawProject data) {
         projectId = data.projectId;
         projectName = data.projectName;
         repositoryUrl = data.repositoryUrl;
-
-        for (RawTask rawTask : data.tasks) {
-            tasklist.add(new Task(rawTask));
-        }
+        this.data = data;
     }
 
     public RawProject toRawProject() {
@@ -37,10 +36,11 @@ public class Project {
         return new RawProject(projectId, rawTasks, projectName, repositoryUrl);
     }
 
-    public void initialize(List<User> users, List<Project> projects) {
-        for (Task task : tasklist) {
-            task.initialize(tasklist, users, projects);
+    public void initialize(List<Task> tasks) {
+        for (RawTask rawTask : data.tasks) {
+            tasklist.add(tasks.get(tasks.indexOf(new Task(rawTask))));
         }
+        data = null;
     }
 
     public long getProjectId() {
@@ -95,4 +95,16 @@ public class Project {
         return new RawProjectNameList(names, ids);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Project project = (Project) o;
+        return projectId == project.projectId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectId);
+    }
 }

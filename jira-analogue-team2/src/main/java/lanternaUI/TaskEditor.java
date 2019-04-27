@@ -182,8 +182,8 @@ public class TaskEditor extends BasicWindow {
         });
 
         panel.addComponent(new EmptySpace());
-        panel.addComponent(saveBtn);
         panel.addComponent(cancelBtn);
+        panel.addComponent(saveBtn);
 
         setComponent(panel);
 
