@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class ClientMain {
 
@@ -47,9 +48,34 @@ public class ClientMain {
             System.out.println("Please log in (enter -user <username> and -pass <password>)");
         }
         return false;
+    }
 
+    private static boolean connectToServer(String serverName, String user, String pass, Client client) throws IOException, InterruptedException {
 
-        // project selection on TUI main screen
+        // open connection
+        int port = Connection.DEFAULT_PORT;
+        String ip = serverName;
+        if (serverName.contains(":")) {
+            String[] parts = serverName.split(":");
+            ip = parts[0];
+            port = Integer.parseInt(parts[1]);
+        }
+        client.connect(ip, port);
+        setUserNow(user);
+        if (user != null && pass != null) {
+            if (client.login(user, pass)) {
+                System.out.println("User " + user + " logged in.");
+                return true;
+
+            } else
+                System.out.println("Login failed.");
+        } else {
+            System.out.println("Please log in (enter -user <username> and -pass <password>)");
+        }
+        return false;
+    }
+
+    // project selection on TUI main screen
         /*String searchTerm = cmd.getOptionValue("s");
 
         if (searchTerm == null || searchTerm.isEmpty()) {
@@ -64,7 +90,6 @@ public class ClientMain {
             }
         }*/
 
-    }
 
     private static void commandLineUI(String[] args) throws ParseException, IOException, InterruptedException {
         Options options = new Options();
@@ -91,8 +116,17 @@ public class ClientMain {
             formatter.printUsage(writer, 80, "Jira Analogue", options);
             writer.flush();
         } else if (!cmd.hasOption("c") || serverName == null/* || !serverList.contains(serverName)*/) {
-            System.out.println("Please establish connection with specific server (enter -c with server name)");
-            System.exit(1);
+            System.out.println("Seems that you forgot the program arguments, please enter the server and IP(default 127.0.0.1:28015): ");
+            Scanner sc = new Scanner(System.in);
+            String sIP = sc.nextLine();
+            System.out.println("Enter username (test name Jaan Tamm): ");
+            String sUser = sc.nextLine();
+            System.out.println("Enter password (test pass jaan123): ");
+            String sPass = sc.nextLine();
+            String[] newArgs = {sIP, sUser, sPass};
+
+            connectToServer(sIP, sUser, sPass, client);
+            client.startTUI(newArgs);
         } /*else if (connectToServer(serverName, cmd, client) && cmd.hasOption("s") && !(cmd.getOptionValue("s") == null)) {
             String projectName = cmd.getOptionValue("s");
             int userId = cmd.getOptionValue("user").;
