@@ -59,6 +59,10 @@ public class Project {
         return repositoryUrl;
     }
 
+    public static void setRepositoryUrl(String repositoryUrl) {
+        Project.repositoryUrl = repositoryUrl;
+    }
+
     public long getNewValidTaskId() {
         long newID = lastTaskID;
         while (true) {

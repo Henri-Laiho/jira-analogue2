@@ -5,6 +5,7 @@ import com.googlecode.lanterna.gui2.*;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
 import com.googlecode.lanterna.input.KeyType;
+import common.Project;
 import common.Task;
 
 import java.text.ParseException;
@@ -23,7 +24,7 @@ public class TaskEditor extends BasicWindow {
         void textFieldEdited(String newValue);
     }
 
-    private static final String[] fieldNames = {"Title", "Description", "Is Done", "Priority", "Deadline"};
+    private static final String[] fieldNames = {"Title", "Description", "Is Done", "Priority", "Deadline", "----------------------"};
 
     private Panel panel;
     private TaskEditedListener listener;
@@ -38,7 +39,7 @@ public class TaskEditor extends BasicWindow {
     private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
         editingFieldNameLabel.setText(fieldNames[fieldIndex]);
         fieldEditor.setText(initial);
-        fieldEditor.setPreferredSize(new TerminalSize(20, multiline ? 10 : 1));
+        fieldEditor.setPreferredSize(new TerminalSize(30, multiline ? 10 : 1));
 
         fieldEditor.setInputFilter((interactable, keyStroke) -> {
             if (filter == null || filter.onInput(interactable, keyStroke)) {
@@ -86,8 +87,12 @@ public class TaskEditor extends BasicWindow {
                 task.getDescription(),
                 task.isCompleted() ? "X" : " ",
                 String.valueOf(task.getPriority()),
-                task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+                task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()),
+                "SET NEW PROJECT REPO LINK"
+        );
+
         taskTable.setTableModel(taskDataInfo);
+
     }
 
     public TaskEditor(Task task, int userRights, List<Task> tasks, TaskEditedListener listener) {
@@ -158,6 +163,12 @@ public class TaskEditor extends BasicWindow {
                                 }
                             });
                     break;
+                case 5:
+                    editText(taskTable.getSelectedColumn(), "", true, null, newValue -> {
+                        Project.setRepositoryUrl(newValue);
+                        refreshScreen();
+                    });
+                    break;
                 default:
             }
         });
@@ -185,7 +196,10 @@ public class TaskEditor extends BasicWindow {
         panel.addComponent(cancelBtn);
         panel.addComponent(saveBtn);
 
+
         setComponent(panel);
+
+        System.out.println(Project.getRepositoryUrl());
 
 
     }
