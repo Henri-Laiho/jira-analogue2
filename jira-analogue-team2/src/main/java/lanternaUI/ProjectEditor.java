@@ -1,9 +1,17 @@
 package lanternaUI;
 
 import com.googlecode.lanterna.gui2.*;
+import com.googlecode.lanterna.gui2.GridLayout;
+import com.googlecode.lanterna.gui2.Label;
+import com.googlecode.lanterna.gui2.Panel;
 import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
+import common.Project;
 
+import java.awt.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
 
 class ProjectEditor extends BasicWindow {
@@ -31,11 +39,12 @@ class ProjectEditor extends BasicWindow {
         // make not focusable, cursor cannot go into the table
         taskData.setEnabled(false);
 
-        panel.addComponent(new Label("Select a task or add a new task:"));
+        panel.addComponent(new Label("Select a task or add a new task (or open project in github):"));
         panel.addComponent(new EmptySpace());
 
         panel.addComponent(actionListBox);
         panel.addComponent(taskData);
+
 
         setComponent(panel);
     }
@@ -66,6 +75,14 @@ class ProjectEditor extends BasicWindow {
             });
             i++;
         }
+        actionListBox.addItem("Open in github", () -> {
+            if (listener != null) {
+                //openWebpage(URI.create(Project.getRepositoryUrl()));
+                openWebpage(URI.create("http:/www.github.com"));
+
+            }
+
+        });
 
         TableModel<String> tableModel = new TableModel<>();
 
@@ -86,6 +103,28 @@ class ProjectEditor extends BasicWindow {
 
     void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed) {
         setTaskList(taskTitles, priorities, deadlines, completed, 0);
+    }
+    //did not create these classes myself, but pretty easy stuff
+    public static boolean openWebpage(URI uri) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(uri);
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean openWebpage(URL url) {
+        try {
+            return openWebpage(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 

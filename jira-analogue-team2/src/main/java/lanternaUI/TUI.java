@@ -353,7 +353,7 @@ public class TUI {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    /*public static void main(String[] args) throws IOException, InterruptedException {
         List<String> projects = new ArrayList<>();
         projects.add("project jira");
         projects.add("onTime google");
@@ -368,4 +368,5 @@ public class TUI {
         tui.setProjects(projects);
         tui.startTerminal(args);
     }
+    */
 }

@@ -437,8 +437,7 @@ public class TextEdit extends KeyBoardTUIElement {
         super.run();
         return enteredText;
     }
-
-    public static void main(String[] args) throws IOException {
+    /*public static void main(String[] args) throws IOException {
         System.out.println("Opening terminal.");
 
         DefaultTerminalFactory dtf = new DefaultTerminalFactory();
@@ -463,6 +462,7 @@ public class TextEdit extends KeyBoardTUIElement {
         System.exit(0);
 
     }
+    */
 
 
 }

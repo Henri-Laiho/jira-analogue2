@@ -15,7 +15,7 @@ public class Project {
     private long projectId = -1;
     protected List<Task> tasklist = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
     private String projectName = null;
-    private String repositoryUrl = null;
+    private static String repositoryUrl = null;
     private long lastTaskID = -1;
     private RawProject data;
 
@@ -55,7 +55,7 @@ public class Project {
         return projectName;
     }
 
-    public String getRepositoryUrl() {
+    public static String getRepositoryUrl() {
         return repositoryUrl;
     }
 
