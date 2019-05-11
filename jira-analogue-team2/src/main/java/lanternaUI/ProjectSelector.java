@@ -56,6 +56,7 @@ class ProjectSelector extends BasicWindow {
             });
             i++;
         }
+
         actionListBox.takeFocus();
     }
 }

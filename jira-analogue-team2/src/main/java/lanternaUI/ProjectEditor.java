@@ -77,8 +77,12 @@ class ProjectEditor extends BasicWindow {
         }
         actionListBox.addItem("Open in github", () -> {
             if (listener != null) {
-                //openWebpage(URI.create(Project.getRepositoryUrl()));
-                openWebpage(URI.create("http:/www.github.com"));
+                try {
+                    openWebpage(URI.create(Project.getRepositoryUrl()));
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("no repo to open");
+                }
 
             }
 

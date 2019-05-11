@@ -88,7 +88,7 @@ public class TaskEditor extends BasicWindow {
                 task.isCompleted() ? "X" : " ",
                 String.valueOf(task.getPriority()),
                 task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()),
-                "SET NEW PROJECT REPO LINK"
+                "SET NEW REPO LINK"
         );
 
         taskTable.setTableModel(taskDataInfo);
@@ -103,7 +103,7 @@ public class TaskEditor extends BasicWindow {
 
         this.tasks = tasks;
         this.listener = listener;
-        panel.addComponent(new Label("Select column:"));
+        panel.addComponent(new Label("Select column(CTRL+ENTER to confirm input):"));
         panel.addComponent(new EmptySpace());
 
         taskTable = new Table<>(fieldNames);
@@ -165,8 +165,13 @@ public class TaskEditor extends BasicWindow {
                     break;
                 case 5:
                     editText(taskTable.getSelectedColumn(), "", true, null, newValue -> {
-                        Project.setRepositoryUrl(newValue);
-                        refreshScreen();
+                        if (newValue.startsWith("www.github.com")) {
+                            Project.setRepositoryUrl(newValue);
+                            refreshScreen();
+                        }
+                        else {
+                            System.out.println("illegal repo link, must contain www.github.com");
+                        }
                     });
                     break;
                 default:
@@ -178,6 +183,7 @@ public class TaskEditor extends BasicWindow {
         editingFieldNameLabel = new Label("");
         fieldEditor = new TextBox(new TerminalSize(0, 0), TextBox.Style.MULTI_LINE);
         fieldEditor.setEnabled(false);
+
         panel.addComponent(editingFieldNameLabel);
         panel.addComponent(new EmptySpace());
         panel.addComponent(fieldEditor);
