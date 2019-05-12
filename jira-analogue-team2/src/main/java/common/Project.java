@@ -4,18 +4,16 @@ import data.RawProject;
 import data.RawProjectNameList;
 import data.RawTask;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Project {
 
     private static final long MAX_TASKS = Short.MAX_VALUE;
 
     private long projectId = -1;
-    protected List<Task> tasklist = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
-    private String projectName = null;
-    private String repositoryUrl = null;
+    protected Map<Long, Task> tasklist = new HashMap<>(); // KNOW WHEN TO UPDATE THIS
+    private String projectName;
+    private String repositoryUrl;
     private long lastTaskID = -1;
     private RawProject data;
 
@@ -26,19 +24,38 @@ public class Project {
         this.data = data;
     }
 
-    public RawProject toRawProject() {
-        RawTask[] rawTasks = new RawTask[tasklist.size()];
-        int i = 0;
-        for (Task task : tasklist) {
-            rawTasks[i] = task.toRawTask();
-            i++;
-        }
-        return new RawProject(projectId, rawTasks, projectName, repositoryUrl);
+    public void update(Project other, Map<Long, Task> tasks) {
+        projectId = other.projectId;
+        projectName = other.projectName;
+        repositoryUrl = other.repositoryUrl;
+        this.data = other.data;
+        initialize(tasks);
     }
 
-    public void initialize(List<Task> tasks) {
-        for (RawTask rawTask : data.tasks) {
-            tasklist.add(tasks.get(tasks.indexOf(new Task(rawTask))));
+    public RawProject toRawProject() {
+        RawTask[] rawTasks = new RawTask[tasklist.size()];
+        long[] taskIds = new long[tasklist.size()];
+        int i = 0;
+        for (Task task : tasklist.values()) {
+            rawTasks[i] = task.toRawTask();
+            taskIds[i] = task.getTaskId();
+            i++;
+        }
+        return new RawProject(projectId, rawTasks, taskIds, projectName, repositoryUrl);
+    }
+
+    public void initialize(Map<Long, Task> tasks) {
+        if (data.tasks != null) {
+            for (RawTask rawTask : data.tasks) {
+                Task task = tasks.get(rawTask.taskId);
+                tasklist.put(task.getTaskId(), task);
+            }
+        }
+        else if (data.taskIds != null) {
+            for (long id : data.taskIds) {
+                Task task = tasks.get(id);
+                tasklist.put(task.getTaskId(), task);
+            }
         }
         data = null;
     }
@@ -47,7 +64,7 @@ public class Project {
         return projectId;
     }
 
-    public List<Task> getTasklist() {
+    public Map<Long, Task> getTasklist() {
         return tasklist;
     }
 
@@ -59,12 +76,16 @@ public class Project {
         return repositoryUrl;
     }
 
+    public void setRepositoryUrl(String repositoryUrl) {
+        this.repositoryUrl = repositoryUrl;
+    }
+
     public long getNewValidTaskId() {
         long newID = lastTaskID;
         while (true) {
             newID++;
             boolean valid = true;
-            for (Task task : tasklist) {
+            for (Task task : tasklist.values()) {
                 if (task.getTaskId() == newID) {
                     valid = false;
                     break;
@@ -81,12 +102,12 @@ public class Project {
         return newID;
     }
 
-    public static RawProjectNameList getProjectNameList(List<Project> projects) {
+    public static RawProjectNameList getProjectNameList(Map<Long, Project> projects) {
         String[] names = new String[projects.size()];
         long[] ids = new long[projects.size()];
 
         int i = 0;
-        for (Project project : projects) {
+        for (Project project : projects.values()) {
             names[i] = project.getProjectName();
             ids[i] = project.getProjectId();
             i++;

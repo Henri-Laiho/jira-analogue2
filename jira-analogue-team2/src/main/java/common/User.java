@@ -14,8 +14,8 @@ public class User {
     private byte[] passwordHash = null;
     private String userEmail = null;
     private Long lastOnlineMS = null;
-    private List<Project> projects = null;  // KNOW WHEN TO UPDATE THIS
-    private HashMap<Project, Integer> projectRights = null;  // KNOW WHEN TO UPDATE THIS
+    private Map<Long, Project> projects = null;  // KNOW WHEN TO UPDATE THIS
+    private Map<Project, Integer> projectRights = null;  // KNOW WHEN TO UPDATE THIS
     private List<User> friendList = null;  // KNOW WHEN TO UPDATE THIS
 
     public long getUserId() {
@@ -37,7 +37,7 @@ public class User {
         this.passwordHash = rawUser.passwordHash;
         this.userEmail = rawUser.userEmail;
         this.lastOnlineMS = rawUser.lastOnlineMS;
-        this.projects = new ArrayList<>();
+        this.projects = new HashMap<>();
         this.projectRights = new HashMap<>();
         this.friendList = new ArrayList<>();
 
@@ -47,7 +47,7 @@ public class User {
             Arrays.sort(rawUser.projects);
     }
 
-    public void initialize(List<ServerUser> users, List<Project> projects) {
+    public void initialize(Collection<ServerUser> users, Collection<Project> projects) {
         if (rawUser.friendList != null) {
             for (User user : users) {
                 if (Arrays.binarySearch(rawUser.friendList, user.getUserId()) >= 0) {
@@ -62,7 +62,7 @@ public class User {
             for (Project project : projects) {
                 int search;
                 if ((search = Arrays.binarySearch(rawUser.projects, project.getProjectId())) >= 0) {
-                    this.projects.add(project);
+                    this.projects.put(project.getProjectId(), project);
                     indexes[i] = search;
                     i++;
                 }
@@ -70,7 +70,7 @@ public class User {
 
             if (rawUser.projectRights != null) {
                 i = 0;
-                for (Project project : this.projects) {
+                for (Project project : this.projects.values()) {
                     projectRights.put(project, rawUser.projectRights[indexes[i]]);
                     i++;
                 }
@@ -80,20 +80,18 @@ public class User {
         rawUser = null;
     }
 
-    // allProjects must be in order.
-    public RawUser toRawUser(List<Project> allProjects) {
+    public RawUser toRawUser() {
+        long[] projectIds = new long[projects.size()];
+        int[] projectRightsEnums = new int[projects.size()];
 
-        long[] projectIds = projects.stream().mapToLong(p -> p.getProjectId()).toArray();
+        int i = 0;
+        for (Project project : projects.values()) {
+            projectIds[i] = project.getProjectId();
+            projectRightsEnums[i] = projectRights.get(project);
+            i++;
+        }
 
-        int[] projectRightsEnums = allProjects.stream().mapToInt(p -> {
-            Integer rights = projectRights.get(p);
-            if (rights == null) {
-                return 0;
-            }
-            return rights;
-        }).toArray();
-
-        long[] friendsIds = friendList.stream().mapToLong(u -> u.getUserId()).toArray();
+        long[] friendsIds = friendList.stream().mapToLong(User::getUserId).toArray();
 
         return new RawUser(userId, username, passwordHash, userEmail, lastOnlineMS, projectIds, projectRightsEnums, friendsIds);
     }
@@ -104,10 +102,10 @@ public class User {
     }
 
     public void addProject(Project project) {
-        projects.add(project);
+        projects.put(project.getProjectId(), project);
     }
 
-    public List<Project> getProjects() {
+    public Map<Long, Project> getProjects() {
         return projects;
     }
 

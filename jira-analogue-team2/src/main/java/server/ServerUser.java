@@ -1,10 +1,8 @@
 package server;
 
-import common.Project;
 import common.User;
 import data.RawUser;
 
-import java.util.List;
 
 public class ServerUser extends User {
     private byte[] salt;
@@ -15,8 +13,8 @@ public class ServerUser extends User {
     }
 
     @Override
-    public RawServerUser toRawUser(List<Project> allProjects) {
-        RawUser rawUser = super.toRawUser(allProjects);
+    public RawServerUser toRawUser() {
+        RawUser rawUser = super.toRawUser();
         return new RawServerUser(rawUser.userId, rawUser.username, rawUser.passwordHash, rawUser.userEmail, rawUser.lastOnlineMS, rawUser.projects, rawUser.projectRights, rawUser.friendList, salt);
     }
 

@@ -6,7 +6,7 @@ import server.ServerUser;
 import java.util.*;
 import java.util.function.ToLongFunction;
 
-public class Task {
+public class Task implements Cloneable {
 
     private RawTask rawTask;
     private long taskId;
@@ -21,7 +21,16 @@ public class Task {
     private List<User> employees = new ArrayList<>();   // KNOW WHEN TO UPDATE THIS
     private List<Project> projects = new ArrayList<>(); // KNOW WHEN TO UPDATE THIS
 
-    public void update(Task other, List<Task> taskList, List<ServerUser> users, List<Project> projects) {
+    @Override
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Cloning should be enabled.", e);
+        }
+    }
+
+    public void update(Task other, Collection<Task> taskList, Collection<ServerUser> users, Collection<Project> projects) {
         this.taskId = other.taskId;
         this.isCompleted = other.isCompleted;
         this.title = other.title;
@@ -53,7 +62,7 @@ public class Task {
             Arrays.sort(rawTask.boards);
     }
 
-    public void initialize(List<Task> taskList, List<ServerUser> users, List<Project> projects) {
+    public void initialize(Collection<Task> taskList, Collection<ServerUser> users, Collection<Project> projects) {
         if (rawTask.masterTaskId != null)
             for (Task task : taskList) {
                 if (task.taskId == rawTask.masterTaskId && task.taskId != taskId) {
@@ -195,4 +204,12 @@ public class Task {
     public int hashCode() {
         return Objects.hash(taskId);
     }
+
+    /*public static Task withID(long id) {
+        Task task = new Task();
+        task.taskId = id;
+        return task;
+    }
+
+    private Task() {}*/
 }

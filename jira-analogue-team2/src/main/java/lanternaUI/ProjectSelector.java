@@ -14,7 +14,7 @@ class ProjectSelector extends BasicWindow {
     private ActionListBox actionListBox;
     private TextBox textBox;
 
-    ProjectSelector(ProjectSelectedListener listener) {
+    ProjectSelector(String username, ProjectSelectedListener listener) {
         setCloseWindowWithEscape(true);
         this.listener = listener;
 
@@ -30,15 +30,15 @@ class ProjectSelector extends BasicWindow {
 */
         //code for another panel above
         actionListBox = new ActionListBox();
-        panel.addComponent(new Label("User: " + ClientMain.getUser() + "\nYou are a collaborator in these projects.\nSelect a project to open:"));
+        panel.addComponent(new Label("User: " + username + "\nYou are a collaborator in these projects.\nSelect a project to open:"));
         panel.addComponent(actionListBox);
 
         setComponent(panel);
 
     }
 
-    ProjectSelector() {
-        this(null);
+    ProjectSelector(String username) {
+        this(username, null);
     }
 
     void setListener(ProjectSelectedListener listener) {
@@ -56,6 +56,7 @@ class ProjectSelector extends BasicWindow {
             });
             i++;
         }
+
         actionListBox.takeFocus();
     }
 }

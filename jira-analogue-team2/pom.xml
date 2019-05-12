@@ -7,10 +7,10 @@
     <parent>
         <artifactId>jira-analogue</artifactId>
         <groupId>ee.ut</groupId>
-        <version>0.1</version>
+        <version>0.2</version>
     </parent>
 
-    <version>${parent.version}</version>
+    <version>0.2</version>
     <artifactId>jira-analogue-team2</artifactId>
 
     <build>
@@ -31,7 +31,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>${parent.artifactId}-client</finalName>
+                            <finalName>${project.parent.artifactId}-client</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -50,7 +50,7 @@
                             <descriptorRefs>
                                 <descriptorRef>jar-with-dependencies</descriptorRef>
                             </descriptorRefs>
-                            <finalName>${parent.artifactId}-server</finalName>
+                            <finalName>${project.parent.artifactId}-server</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>
@@ -70,9 +70,9 @@
     <dependencies>
 
         <dependency>
-            <groupId>${parent.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>minijira-protocol</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- CLI -->

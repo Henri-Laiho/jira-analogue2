@@ -13,6 +13,7 @@ import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.terminal.swing.SwingTerminalFrame;
 import common.Project;
 import common.Task;
+import data.RawProjectRights;
 import data.RawTask;
 
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class TUI {
         while (terminalRunning) {
 
             // Keep asking for a project to open
-            ProjectSelector projectSelector = new ProjectSelector();
+            ProjectSelector projectSelector = new ProjectSelector(displayUsername);
             projectSelector.setListener(new ProjectSelector.ProjectSelectedListener() {
                 boolean editProject = true;
                 int selectedIndex = -1;
@@ -127,7 +128,7 @@ public class TUI {
 
                     try {
                         if (client.selectProject(projectIndex)) {
-                            if (client.getUserRightsInProject() > 0) {
+                            if (client.getUserRightsInProject() > RawProjectRights.NOBODY.getRightsValue()) {
 
                                 while (terminalRunning && editProject) {
                                     Project project = client.getOpenedProject();
@@ -135,27 +136,41 @@ public class TUI {
                                     List<String> completed = new ArrayList<>();
                                     List<String> priorities = new ArrayList<>();
                                     List<String> deadlines = new ArrayList<>();
+                                    List<Long> taskIds = new ArrayList<>();
+
+                                    Runnable resetter = () -> {
+                                        titles.clear();
+                                        completed.clear();
+                                        priorities.clear();
+                                        deadlines.clear();
+                                    };
 
                                     Consumer<Task> taskAdder = task -> {
                                         titles.add(task.getTitle());
                                         completed.add(task.isCompleted() ? "Done" : "Not Done");
                                         priorities.add(String.valueOf(task.getPriority()));
                                         deadlines.add(task.getDeadline() == null ? null : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+                                        taskIds.add(task.getTaskId());
                                     };
-                                    project.getTasklist().forEach(taskAdder);
+                                    project.getTasklist().values().forEach(taskAdder);
 
                                     ProjectEditor projectEditor = new ProjectEditor();
                                     projectEditor.setListener(new ProjectEditor.TaskSelectedListener() {
                                         @Override
                                         public void taskSelected(int taskIndex) {
                                             selectedIndex = taskIndex;
-                                            Task task = project.getTasklist().get(taskIndex);
+                                            Task task = (Task) project.getTasklist().get(taskIds.get(taskIndex)).clone();
 
                                             projectEditor.close();
                                             TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
                                                 try {
+                                                    //project.getTasklist().put(task1.getTaskId(), task1);
                                                     client.sendUpdateTask(task1);
-                                                    taskAdder.accept(task1);
+                                                    client.selectProject(projectIndex);
+
+                                                    resetter.run();
+                                                    project.getTasklist().values().forEach(taskAdder);
+                                                    //taskAdder.accept(task1);
                                                     projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
@@ -171,11 +186,16 @@ public class TUI {
                                             Task task = new Task(new RawTask(project.getNewValidTaskId(), false, "Enter Title",
                                                     "Enter description", -1, client.getUserId(), null, System.currentTimeMillis(),
                                                     null, null, null));
+                                            task.getProjects().add(project);
 
                                             TaskEditor taskEditor = new TaskEditor(task, client.getUserRightsInProject(), project.getTasklist(), task1 -> {
                                                 try {
                                                     client.sendCreateTask(task1);
-                                                    taskAdder.accept(task1);
+                                                    client.selectProject(projectIndex);
+
+                                                    resetter.run();
+                                                    project.getTasklist().values().forEach(taskAdder);
+                                                    //taskAdder.accept(task1);
                                                     projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
@@ -184,6 +204,28 @@ public class TUI {
 
                                             projectEditor.close();
                                             gui.addWindowAndWait(taskEditor);
+                                        }
+
+                                        @Override
+                                        public void setRepoUrl(String url) {
+                                            if (client != null && client.getOpenedProject() != null) {
+                                                client.getOpenedProject().setRepositoryUrl(url);
+                                                try {
+                                                    client.sendUpdateProject();
+                                                    client.selectProject(projectIndex);
+
+                                                    resetter.run();
+                                                    project.getTasklist().values().forEach(taskAdder);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+                                                } catch (IOException | InterruptedException e) {
+                                                    throw new RuntimeException(e);
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public String getRepoUrl() {
+                                            return client != null && client.getOpenedProject() != null ? client.getOpenedProject().getRepositoryUrl() : null;
                                         }
                                     });
 
@@ -345,7 +387,8 @@ public class TUI {
         this.client = client;
         System.out.println("TUI constructor");
     }
-
+    
+    /*
     /**
      * Main method so we can test the UI separately.
      *
@@ -353,7 +396,7 @@ public class TUI {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    /*public static void main(String[] args) throws IOException, InterruptedException {
         List<String> projects = new ArrayList<>();
         projects.add("project jira");
         projects.add("onTime google");
@@ -368,4 +411,5 @@ public class TUI {
         tui.setProjects(projects);
         tui.startTerminal(args);
     }
+    */
 }

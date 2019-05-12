@@ -6,6 +6,7 @@ import com.googlecode.lanterna.gui2.table.Table;
 import com.googlecode.lanterna.gui2.table.TableModel;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.input.KeyType;
+import common.Project;
 import common.Task;
 import common.User;
 
@@ -33,8 +34,9 @@ public class TaskEditor extends BasicWindow {
 
     private Panel panel;
     private TaskEditedListener listener;
-    private List<Task> tasks;
+    private Map<Long, Task> tasks;
     private List<String> taskTitles;
+    private List<Long> taskIds;
     private Table<String> taskTable;
     private Label editingFieldNameLabel;
     private TextBox fieldEditor;
@@ -42,15 +44,20 @@ public class TaskEditor extends BasicWindow {
     private Button saveBtn;
     private Task task;
 
-    private void selectItem(int fieldIndex, String initial, List<String> items, InputFilter filter, ItemSelectedListener listener) {
-        Collections.sort(items);
+    private void selectItem(int fieldIndex, int initial, List<String> items, InputFilter filter, ItemSelectedListener listener) {
         editingFieldNameLabel.setText(fieldNames[fieldIndex]);
-        fieldEditor.setText(initial);
+        String initialText;
+        if (initial >= 0 && initial < items.size())
+            initialText = items.get(initial);
+        else
+            initialText = "";
+        fieldEditor.setText(initialText);
         fieldEditor.setPreferredSize(new TerminalSize(20, 1));
 
         fieldEditor.setInputFilter(new InputFilter() {
-            private String input = initial;
-            private int selected = items.indexOf(initial);
+            //private String input = initialText;
+            private int selected = initial;
+
             @Override
             public boolean onInput(Interactable interactable, KeyStroke keyStroke) {
                 if (filter == null || filter.onInput(interactable, keyStroke)) {
@@ -58,8 +65,7 @@ public class TaskEditor extends BasicWindow {
                     if (keyStroke.getKeyType() == KeyType.Tab) {
                         int i = 0;
                         for (String s : items) {
-                            if (s.startsWith(input)) {
-                                input = fieldEditor.getText();
+                            if (s.startsWith(text)) {
                                 fieldEditor.setText(s);
                                 selected = i;
                                 break;
@@ -68,33 +74,15 @@ public class TaskEditor extends BasicWindow {
                         }
                         return false;
                     } else if (keyStroke.getKeyType() == KeyType.ArrowUp) {
-                        for (int i = selected-1; i >= 0; i--) {
-                            if (items.get(i).startsWith(input)) {
-                                fieldEditor.setText(items.get(i));
-                                selected = i;
-                                break;
-                            }
-                        }
+                        if (selected > 0)
+                            selected--;
+                        if (selected >= 0)
+                            fieldEditor.setText(items.get(selected));
                         return false;
                     } else if (keyStroke.getKeyType() == KeyType.ArrowDown) {
-                        if (selected >= 0) {
-                            for (int i = selected+1; i < items.size(); i++) {
-                                if (items.get(i).startsWith(input)) {
-                                    fieldEditor.setText(items.get(i));
-                                    selected = i;
-                                    break;
-                                }
-                            }
-                        } else {
-                            for (int i = 0; i < items.size(); i++) {
-                                if (items.get(i).startsWith(input)) {
-                                    input = fieldEditor.getText();
-                                    fieldEditor.setText(items.get(i));
-                                    selected = i;
-                                    break;
-                                }
-                            }
-                        }
+                        if (selected < items.size() - 1)
+                            selected++;
+                        fieldEditor.setText(items.get(selected));
                         return false;
                     }
                     if (keyStroke.getKeyType() == KeyType.Escape) {
@@ -107,7 +95,6 @@ public class TaskEditor extends BasicWindow {
                         TaskEditor.this.resetTextField();
                         return false;
                     }
-                    input = fieldEditor.getText();
                     return true;
                 }
                 return false;
@@ -121,7 +108,7 @@ public class TaskEditor extends BasicWindow {
     private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
         editingFieldNameLabel.setText(fieldNames[fieldIndex]);
         fieldEditor.setText(initial);
-        fieldEditor.setPreferredSize(new TerminalSize(20, multiline ? 10 : 1));
+        fieldEditor.setPreferredSize(new TerminalSize(30, multiline ? 10 : 1));
 
         fieldEditor.setInputFilter((interactable, keyStroke) -> {
             if (filter == null || filter.onInput(interactable, keyStroke)) {
@@ -170,11 +157,14 @@ public class TaskEditor extends BasicWindow {
                 task.isCompleted() ? "X" : " ",
                 String.valueOf(task.getPriority()),
                 task.getDeadline() == null ? "-" : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()),
-                task.getMasterTask() == null ? "-" : task.getMasterTask().getTitle());
+                task.getMasterTask() == null ? "-" : task.getMasterTask().getTitle()
+        );
+
         taskTable.setTableModel(taskDataInfo);
+
     }
 
-    public TaskEditor(Task task, int userRights, List<Task> tasks, TaskEditedListener listener) {
+    public TaskEditor(Task task, int userRights, Map<Long, Task> tasks, TaskEditedListener listener) {
         this.task = task;
         setCloseWindowWithEscape(true);
         panel = new Panel();
@@ -183,12 +173,19 @@ public class TaskEditor extends BasicWindow {
         this.tasks = tasks;
         this.listener = listener;
 
+        ArrayList<Map.Entry<Long, Task>> entries = new ArrayList<>(tasks.entrySet());
+        entries.sort(Comparator.comparing(o -> o.getValue().getTitle()));
+
         taskTitles = new ArrayList<>(tasks.size());
-        for (Task task1 : tasks) {
-            taskTitles.add(task1.getTitle());
+        taskIds = new ArrayList<>(tasks.size());
+        for (Map.Entry<Long, Task> task1 : entries) {
+            if (task1.getKey() != task.getTaskId()) {
+                taskTitles.add(task1.getValue().getTitle());
+                taskIds.add(task1.getValue().getTaskId());
+            }
         }
 
-        panel.addComponent(new Label("Select column:"));
+        panel.addComponent(new Label("Select column(CTRL+ENTER to confirm input):"));
         panel.addComponent(new EmptySpace());
 
         taskTable = new Table<>(fieldNames);
@@ -253,14 +250,24 @@ public class TaskEditor extends BasicWindow {
                     break;
                 case 5:
                     selectItem(taskTable.getSelectedColumn(),
-                            TaskEditor.this.task.getMasterTask() == null ? "" : TaskEditor.this.task.getMasterTask().getTitle(),
+                            TaskEditor.this.task.getMasterTask() == null ? -1 : taskIds.indexOf(TaskEditor.this.task.getMasterTask().getTaskId()),
                             taskTitles,
                             null,
                             result -> {
-                                TaskEditor.this.task.setMasterTask(TaskEditor.this.tasks.get(result));
+                                TaskEditor.this.task.setMasterTask(TaskEditor.this.tasks.get(taskIds.get(result)));
                                 refreshScreen();
                             });
                     break;
+                /*case 6:
+                    editText(taskTable.getSelectedColumn(), "", true, null, newValue -> {
+                        if (newValue.startsWith("www.github.com")) {
+                            Project.setRepositoryUrl(newValue);
+                            refreshScreen();
+                        } else {
+                            System.out.println("illegal repo link, must contain www.github.com");
+                        }
+                    });
+                    break;*/
                 default:
             }
         });
@@ -270,6 +277,7 @@ public class TaskEditor extends BasicWindow {
         editingFieldNameLabel = new Label("");
         fieldEditor = new TextBox(new TerminalSize(0, 0), TextBox.Style.MULTI_LINE);
         fieldEditor.setEnabled(false);
+
         panel.addComponent(editingFieldNameLabel);
         panel.addComponent(new EmptySpace());
         panel.addComponent(fieldEditor);
@@ -288,12 +296,12 @@ public class TaskEditor extends BasicWindow {
         panel.addComponent(cancelBtn);
         panel.addComponent(saveBtn);
 
-        setComponent(panel);
 
+        setComponent(panel);
 
     }
 
-    public TaskEditor(Task task, int userRights, List<Task> tasks) {
+    public TaskEditor(Task task, int userRights, Map<Long, Task> tasks) {
         this(task, userRights, tasks, null);
     }
 

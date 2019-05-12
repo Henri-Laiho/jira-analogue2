@@ -11,43 +11,10 @@ import java.util.Scanner;
 
 public class ClientMain {
 
-    private static String userNow;
-
-    private static void setUserNow(String userNow) {
-        ClientMain.userNow = userNow;
-    }
-
-    public static String getUser() {
-        return userNow;
-    }
-
     private static boolean connectToServer(String serverName, CommandLine cmd, Client client) throws IOException, InterruptedException {
-
-        // open connection
-        int port = Connection.DEFAULT_PORT;
-        String ip = serverName;
-        if (serverName.contains(":")) {
-            String[] parts = serverName.split(":");
-            ip = parts[0];
-            port = Integer.parseInt(parts[1]);
-        }
-        client.connect(ip, port);
-
         String user = cmd.getOptionValue("user");
-        setUserNow(user);
         String pass = cmd.getOptionValue("pass");
-
-        if (user != null && pass != null) {
-            if (client.login(user, pass)) {
-                System.out.println("User " + user + " logged in.");
-                return true;
-
-            } else
-                System.out.println("Login failed.");
-        } else {
-            System.out.println("Please log in (enter -user <username> and -pass <password>)");
-        }
-        return false;
+        return connectToServer(serverName, user, pass, client);
     }
 
     private static boolean connectToServer(String serverName, String user, String pass, Client client) throws IOException, InterruptedException {
@@ -61,7 +28,6 @@ public class ClientMain {
             port = Integer.parseInt(parts[1]);
         }
         client.connect(ip, port);
-        setUserNow(user);
         if (user != null && pass != null) {
             if (client.login(user, pass)) {
                 System.out.println("User " + user + " logged in.");
@@ -116,7 +82,7 @@ public class ClientMain {
             formatter.printUsage(writer, 80, "Jira Analogue", options);
             writer.flush();
         } else if (!cmd.hasOption("c") || serverName == null/* || !serverList.contains(serverName)*/) {
-            System.out.println("Seems that you forgot the program arguments, please enter the server and IP(default 127.0.0.1:28015): ");
+            System.out.println("Seems that you forgot the program arguments, please enter the server name or IP (default 127.0.0.1:28015): ");
             Scanner sc = new Scanner(System.in);
             String sIP = sc.nextLine();
             System.out.println("Enter username (test name Jaan Tamm): ");

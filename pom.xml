@@ -6,12 +6,13 @@
 
     <groupId>ee.ut</groupId>
     <artifactId>jira-analogue</artifactId>
-    <version>0.1</version>
+    <version>0.2</version>
     <packaging>pom</packaging>
 
     <build>
         <plugins>
             <plugin>
+                <version>1.6.0</version>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>

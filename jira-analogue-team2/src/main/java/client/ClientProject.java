@@ -9,7 +9,12 @@ public class ClientProject extends Project {
     public ClientProject(RawProject data) {
         super(data);
         for (RawTask rawTask : data.tasks) {
-            tasklist.add(new Task(rawTask));
+            Task task = new Task(rawTask);
+            tasklist.put(task.getTaskId(), task);
         }
+    }
+
+    public void addTask(Task task) {
+        tasklist.put(task.getTaskId(), task);
     }
 }

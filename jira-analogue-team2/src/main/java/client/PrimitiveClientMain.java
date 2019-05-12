@@ -15,7 +15,7 @@ import java.util.Scanner;
  */
 public class PrimitiveClientMain {
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         System.out.println("primitive client.");
         Scanner stdin = new Scanner(System.in);
 
@@ -66,7 +66,9 @@ public class PrimitiveClientMain {
 
 
         }
+
     }
+    */
 
     static void send(Scanner stdin, PrimitiveConnection b) throws IOException {
         System.out.print("MessageType >>> ");
