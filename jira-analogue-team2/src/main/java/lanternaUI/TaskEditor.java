@@ -45,7 +45,6 @@ public class TaskEditor extends BasicWindow {
     private Task task;
 
     private void selectItem(int fieldIndex, int initial, List<String> items, InputFilter filter, ItemSelectedListener listener) {
-        editingFieldNameLabel.setText(fieldNames[fieldIndex]);
         String initialText;
         if (initial >= 0 && initial < items.size())
             initialText = items.get(initial);
@@ -106,16 +105,18 @@ public class TaskEditor extends BasicWindow {
     }
 
     private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
-        if (!fieldNames[fieldIndex].equals("Deadline"))
+        editText(fieldIndex, initial, multiline, filter, listener, null);
+    }
+
+    private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener, String label) {
+
+        if (label == null)
             editingFieldNameLabel.setText(fieldNames[fieldIndex] + ":");
         else
-            editingFieldNameLabel.setText("Deadline: (dd.MM.yyyy HH:mm:ss)");
-        if (initial.equals("Enter Title") || initial.equals("Enter description") || initial.equals("dd.MM.yyyy HH:mm:ss")) {
-            fieldEditor.setText("");
-        }
-        else {
-            fieldEditor.setText(initial);
-        }
+            editingFieldNameLabel.setText(label);
+
+        fieldEditor.setText(initial);
+
         fieldEditor.setPreferredSize(new TerminalSize(30, multiline ? 10 : 1));
 
         fieldEditor.setInputFilter((interactable, keyStroke) -> {
@@ -213,13 +214,13 @@ public class TaskEditor extends BasicWindow {
         taskTable.setSelectAction(() -> {
             switch (taskTable.getSelectedColumn()) {
                 case 0:
-                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getTitle(), false, null, newValue -> {
+                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getTitle().equals("Enter Title") ? "" : TaskEditor.this.task.getTitle() , false, null, newValue -> {
                         TaskEditor.this.task.setTitle(newValue);
                         refreshScreen();
                     });
                     break;
                 case 1:
-                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getDescription(), true, null, newValue -> {
+                    editText(taskTable.getSelectedColumn(), TaskEditor.this.task.getDescription().equals("Enter description") ? "" : TaskEditor.this.task.getDescription(), true, null, newValue -> {
                         TaskEditor.this.task.setDescription(newValue);
                         refreshScreen();
                     });
@@ -240,7 +241,7 @@ public class TaskEditor extends BasicWindow {
                     break;
                 case 4:
                     editText(taskTable.getSelectedColumn(),
-                            task.getDeadline() == null ? DATETIME_FORMAT : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()),
+                            task.getDeadline() == null ? " " : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()),
                             false,
                             (interactable, keyStroke) ->
                                     keyStroke.getKeyType() != KeyType.Character
@@ -254,7 +255,8 @@ public class TaskEditor extends BasicWindow {
                                     System.out.println("Cannot parse date: " + newValue);
                                     //throw new RuntimeException("Cannot parse date: " + newValue);
                                 }
-                            });
+                            },
+                            "Deadline: (" + DATETIME_FORMAT + ")");
                     break;
                 case 5:
                     selectItem(taskTable.getSelectedColumn(),
