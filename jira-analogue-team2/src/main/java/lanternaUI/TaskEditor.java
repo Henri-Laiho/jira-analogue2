@@ -106,8 +106,16 @@ public class TaskEditor extends BasicWindow {
     }
 
     private void editText(int fieldIndex, String initial, boolean multiline, InputFilter filter, TextFieldEditedListener listener) {
-        editingFieldNameLabel.setText(fieldNames[fieldIndex]);
-        fieldEditor.setText(initial);
+        if (!fieldNames[fieldIndex].equals("Deadline"))
+            editingFieldNameLabel.setText(fieldNames[fieldIndex] + ":");
+        else
+            editingFieldNameLabel.setText("Deadline: (dd.MM.yyyy HH:mm:ss)");
+        if (initial.equals("Enter Title") || initial.equals("Enter description") || initial.equals("dd.MM.yyyy HH:mm:ss")) {
+            fieldEditor.setText("");
+        }
+        else {
+            fieldEditor.setText(initial);
+        }
         fieldEditor.setPreferredSize(new TerminalSize(30, multiline ? 10 : 1));
 
         fieldEditor.setInputFilter((interactable, keyStroke) -> {
