@@ -100,7 +100,7 @@ class ProjectEditor extends BasicWindow {
         panel.setLayoutManager(new GridLayout(2));
 
         actionListBox = new ActionListBox();
-        taskData = new Table<>("Is Done", "Priority", "Deadline");
+        taskData = new Table<>("Is Done", "Priority", "Deadline", "Time due");
 
         // make not focusable, cursor cannot go into the table
         taskData.setEnabled(false);
@@ -129,13 +129,15 @@ class ProjectEditor extends BasicWindow {
         this.listener = listener;
     }
 
-    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed, int selectedTask) {
+    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> remainingTimes, List<String> completed, int selectedTask) {
         actionListBox.clearItems();
 
         actionListBox.addItem("Create task", () -> {
             if (listener != null)
                 listener.createTask();
         });
+
+
 
         int extraOptionCount = actionListBox.getItemCount();
         int i = 0;
@@ -176,9 +178,10 @@ class ProjectEditor extends BasicWindow {
         tableModel.addColumn("Is Done", null);
         tableModel.addColumn("Priority", null);
         tableModel.addColumn("Deadline", null);
+        tableModel.addColumn("Time due", null);
 
         for (int j = 0; j < completed.size() && j < priorities.size() && j < deadlines.size(); j++) {
-            tableModel.addRow(completed.get(j), priorities.get(j), deadlines.get(j));
+            tableModel.addRow(remainingTimes.get(j), priorities.get(j), deadlines.get(j), completed.get(j));
         }
 
         taskData.setTableModel(tableModel);
@@ -188,8 +191,8 @@ class ProjectEditor extends BasicWindow {
         actionListBox.takeFocus();
     }
 
-    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed) {
-        setTaskList(taskTitles, priorities, deadlines, completed, 0);
+    void setTaskList(List<String> taskTitles, List<String> priorities, List<String> deadlines, List<String> completed, List<String> remainingTimes) {
+        setTaskList(taskTitles, priorities, deadlines, completed, remainingTimes, 0);
     }
 
     //did not create these classes myself, but pretty easy stuff

@@ -19,6 +19,7 @@ import data.RawTask;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -136,6 +137,7 @@ public class TUI {
                                     List<String> completed = new ArrayList<>();
                                     List<String> priorities = new ArrayList<>();
                                     List<String> deadlines = new ArrayList<>();
+                                    List<String> remainingTimes = new ArrayList<>();
                                     List<Long> taskIds = new ArrayList<>();
 
                                     Runnable resetter = () -> {
@@ -143,6 +145,7 @@ public class TUI {
                                         completed.clear();
                                         priorities.clear();
                                         deadlines.clear();
+                                        remainingTimes.clear();
                                     };
 
                                     Consumer<Task> taskAdder = task -> {
@@ -150,6 +153,8 @@ public class TUI {
                                         completed.add(task.isCompleted() ? "Done" : "Not Done");
                                         priorities.add(String.valueOf(task.getPriority()));
                                         deadlines.add(task.getDeadline() == null ? null : new SimpleDateFormat(DATETIME_FORMAT).format(task.getDeadline()));
+                                        long remaining = task.getDeadline() == null ? 0 : task.getDeadline().getTime() - System.currentTimeMillis();
+                                        remainingTimes.add(String.valueOf(remaining/3600/1000 /24) + " days " + String.valueOf(remaining/3600/1000 % 24) + " hours " +String.valueOf(remaining/60000 % 60) + " minutes");
                                         taskIds.add(task.getTaskId());
                                     };
                                     project.getTasklist().values().forEach(taskAdder);
@@ -171,7 +176,7 @@ public class TUI {
                                                     resetter.run();
                                                     project.getTasklist().values().forEach(taskAdder);
                                                     //taskAdder.accept(task1);
-                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, remainingTimes, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -196,7 +201,7 @@ public class TUI {
                                                     resetter.run();
                                                     project.getTasklist().values().forEach(taskAdder);
                                                     //taskAdder.accept(task1);
-                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, remainingTimes, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -216,7 +221,7 @@ public class TUI {
 
                                                     resetter.run();
                                                     project.getTasklist().values().forEach(taskAdder);
-                                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+                                                    projectEditor.setTaskList(titles, priorities, deadlines, remainingTimes, completed, selectedIndex);
                                                 } catch (IOException | InterruptedException e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -229,7 +234,7 @@ public class TUI {
                                         }
                                     });
 
-                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, selectedIndex);
+                                    projectEditor.setTaskList(titles, priorities, deadlines, completed, remainingTimes, selectedIndex);
 
                                     // stop reopening the project editor window when escape is pressed - set ui loop condition to false.
                                     projectEditor.addWindowListener(new WindowListenerAdapter() {
